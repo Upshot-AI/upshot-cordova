@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova_plugin_upshotplugin" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>UpshotPlugin</name><js-module name="UpshotPlugin" src="www/UpshotPlugin.js"><clobbers target="cordova.plugins.UpshotPlugin" /></js-module>
+    <platform name="android">
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="UpshotPlugin"><param name="android-package" value="cordova_plugin_upshotplugin.UpshotPlugin" /></feature>
+        </config-file>
+        <config-file parent="/*" target="AndroidManifest.xml" />
+
+        <config-file parent="/manifest/application" target="AndroidManifest.xml" >
+            <service android:name="cordova_plugin_upshotplugin.UpshotFirebaseMessagingService">
+                <intent-filter>
+                    <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                </intent-filter>
+            </service>
+            <service android:name="cordova_plugin_upshotplugin.UpshotFirebaseInstanceIDService">
+                <intent-filter>
+                    <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+                </intent-filter>
+            </service>
+        </config-file>
+
+        <source-file src="src/android/UpshotPlugin.java" target-dir="src/cordova_plugin_upshotplugin" />
+        <source-file src="src/android/UpshotFirebaseInstanceIDService.java" target-dir="src/cordova_plugin_upshotplugin" />
+        <source-file src="src/android/UpshotFirebaseMessagingService.java" target-dir="src/cordova_plugin_upshotplugin" />
+        <source-file src="src/android/UpshotPushPresenter.java" target-dir="src/cordova_plugin_upshotplugin" />
+        <source-file src="src/android/UpshotBaseActivity.java" target-dir="src/cordova_plugin_upshotplugin" />
+
+        <source-file src="src/android/network/UpshotDecompress.java" target-dir="src/cordova_plugin_upshotplugin" />
+        <source-file src="src/android/network/UpshotFileUtil.java" target-dir="src/cordova_plugin_upshotplugin" />
+        <source-file src="src/android/network/UpshotHttpHelper.java" target-dir="src/cordova_plugin_upshotplugin" />
+        <source-file src="src/android/network/UpshotJsonUtil.java" target-dir="src/cordova_plugin_upshotplugin" />
+        <source-file src="src/android/network/UpshotDownloaderTask.java" target-dir="src/cordova_plugin_upshotplugin" />
+
+        <source-file src="src/android/animpush/UpshotEnhancedPushUtils.java" target-dir="src/cordova_plugin_upshotplugin/animpush" />
+        <source-file src="src/android/animpush/UpshotGifAnimator.java" target-dir="src/cordova_plugin_upshotplugin/animpush" />
+        <source-file src="src/android/animpush/UpshotGifDecoder.java" target-dir="src/cordova_plugin_upshotplugin/animpush" />
+        <source-file src="src/android/animpush/UpshotGifDecoderView.java" target-dir="src/cordova_plugin_upshotplugin/animpush" />
+        <source-file src="src/android/animpush/UpshotGifNotification.java" target-dir="src/cordova_plugin_upshotplugin/animpush" />
+        <source-file src="src/android/animpush/UpshotGifNotificationDeleteReceiver.java" target-dir="src/cordova_plugin_upshotplugin/animpush" />
+        <source-file src="src/android/animpush/UpshotGifUpdator.java" target-dir="src/cordova_plugin_upshotplugin/animpush" />
+
+        <framework src="com.google.firebase:firebase-messaging:12.0.1" />
+    </platform>
+
+    <platform name="ios">
+        <config-file parent="/*" target="config.xml">
+            <feature name="UpshotPlugin"><param name="ios-package" value="UpshotPlugin" /></feature>
+        </config-file>
+        <source-file src="src/ios/UpshotPlugin.h" />
+        <source-file src="src/ios/UpshotPlugin.m" />
+        <source-file src="src/ios/AppDelegate+UpshotPlugin.h" />
+        <source-file src="src/ios/AppDelegate+UpshotPlugin.m" />
+        <source-file src="src/ios/UpshotNotificationService.h" />
+        <source-file src="src/ios/UpshotNotificationService.m" />
+    </platform>
+</plugin>        
