@@ -1,0 +1,25 @@
+{
+  "name": "cordova_plugin_upshotplugin",
+  "version": "0.0.1",
+  "description": "This plugin  will enable you to track events, send notifications, In-apps messages to your users",
+  "cordova": {
+    "id": "cordova_plugin_upshotplugin",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Upshot-AI/upshot-cordova.git"
+  },
+  "keywords": [
+    "UpshotPlugin",
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios",
+  ],
+  "author": "Upshot",
+  "license": "MIT",
+  "homepage": "https://github.com/Upshot-AI/upshot-cordova/blob/master/README.md"
+}
