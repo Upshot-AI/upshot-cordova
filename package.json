@@ -17,7 +17,7 @@
     "UpshotPlugin",
     "ecosystem:cordova",
     "cordova-android",
-    "cordova-ios",
+    "cordova-ios"
   ],
   "author": "Upshot",
   "license": "MIT",

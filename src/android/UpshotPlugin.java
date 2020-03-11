@@ -32,9 +32,9 @@ public class UpshotPlugin extends CordovaPlugin {
             return true;
         }
 
-        if (action.equals("getPushClickDetails")) {
+        if (action.equals("getPushPayload")) {
             String message = args.getString(0);            
-            this.getPushClickDetails(message, callbackContext);
+            this.getPushPayload(message, callbackContext);
             return true;
         }
         return false;
@@ -86,7 +86,7 @@ public class UpshotPlugin extends CordovaPlugin {
 
     }
 
-    private void getPushClickDetails(String message, CallbackContext callbackContext) {
+    private void getPushPayload(String message, CallbackContext callbackContext) {
 
         pushCallbackContext = callbackContext;
         if (!TextUtils.isEmpty(pushPayload)) {

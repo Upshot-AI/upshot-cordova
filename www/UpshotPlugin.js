@@ -2,9 +2,9 @@ var exec = require('cordova/exec');
 
 var UpshotPlugin = {
         
-    initialize: function(options, callback) {
+    initialize: function(params, callback) {
 
-        upshot.init( options, callback);            
+        upshot.init( params, callback);            
     },
 
     getDeviceToken: function(success, error) {
@@ -12,9 +12,9 @@ var UpshotPlugin = {
         exec(success, error, 'UpshotPlugin', 'getDeviceToken',[]);
     }, 
 
-    getPushClickDetails: function(success) {
+    getPushPayload: function(success) {
 
-        exec(success,null,'UpshotPlugin','getPushClickDetails',[]);
+        exec(success,null,'UpshotPlugin','getPushPayload',[]);
     },
 
     registerForPushWithForeground: function(arguments, status) {
@@ -22,21 +22,17 @@ var UpshotPlugin = {
     	exec(status, null, 'UpshotPlugin', 'registerForPushWithForeground', [arguments]);
     },        
 
-    updateUserProfile: function(userDetails, callback) {
+    updateUserProfile: function(params, callback) {
 
-        upshot.updateUserProfile(userDetails, callback);            
+        upshot.updateUserProfile(params, callback);            
     },
 
-    sendUserLogoutInfo: function(callback) {
-        upshot.updateUserProfile({'appuid': ''}, callback);        
-    },
-
-    getCurrentUserDetails: function(fields) {
+    getCurrentProfile: function(fields) {
 
         return upshot.getCurrentProfile(fields);
     },
 
-    getUpshotUserId: function() {
+    getUserId: function() {
 
         return upshot.getUserId();
     },
@@ -44,21 +40,6 @@ var UpshotPlugin = {
     disableUser: function(shouldDisable, callback) {
 
         upshot.disableUser(shouldDisable, callback)
-    },
-
-    emailOptout: function(shouldOptout) {
-
-        upshot.updateUserProfile({'emailOptout': shouldOptout})        
-    },
-
-    smsOptout: function(shouldOptout) {
-
-        upshot.updateUserProfile({'smsOptout': shouldOptout})        
-    },
-
-    pushOptout: function(shouldOptout) {
-
-        upshot.updateUserProfile({'pushOptout': shouldOptout})        
     },
 
     createPageViewEvent: function(pageName) {
@@ -79,30 +60,25 @@ var UpshotPlugin = {
         upshot.closeEventForID(eventId)
     },
 
-    getActivityWithTag: function(activityType, tagName, options) {
+    getActivity: function(activityType, tagName, options) {
 
         upshot.getActivity(activityType, tagName, options);
-    },  
-
-    getAnyActivityWithTag: function(tagName, options) {
-
-        upshot.getActivity('UpshotActivityTypeAny', tagName, options);
     },   
     
-    getActivityWithActivityId: function(activityId) {
+    getActivityById: function(activityId) {
         
         upshot.getActivityById(activityId);
     },
 
-    getUserBadges: function() {
+    getBadges: function() {
        return upshot.getBadges();
     },
 
-    fetchInbox: function() {
+    fetchInboxInfo: function() {
         return upshot.fetchInboxInfo();
     },
 
-    getRewardsList: function(successCallback, failureCallback) {
+    getRewardStatus: function(successCallback, failureCallback) {
 
         upshot.getRewardStatus(successCallback,failureCallback);
     },
@@ -112,12 +88,12 @@ var UpshotPlugin = {
         upshot.redeemRewards(programId, redeemValue, tag, transactionValue, successCallback, failureCallback);
     },
 
-    getRewardTransactionhistory: function(programId, transactionType, successCallback, failureCallback) {
+    getRewardHistory: function(programId, transactionType, successCallback, failureCallback) {
 
         upshot.getRewardHistory(programId, transactionType, successCallback, failureCallback);
     },
 
-    getRewardRuleDetails: function(programId, successCallback, failureCallback) {
+    getRewardDetails: function(programId, successCallback, failureCallback) {
 
         upshot.getRewardDetails(programId, successCallback, failureCallback);
     },
@@ -133,12 +109,12 @@ var UpshotPlugin = {
         } 
     },
 
-    sendPushClickDetails: function(payload) {
+    pushClickEvent: function(payload) {
 
         upshot.pushClickEvent(JSON.parse(payload));
     },
 
-    sendCustomPush: function(pushPayload, callback) {
+    sendPushDetails: function(pushPayload, callback) {
 
         upshot.sendPushDetails(pushPayload, callback);
     },

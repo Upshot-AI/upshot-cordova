@@ -23,7 +23,7 @@
     }
 }
 
-- (void)getPushClickDetails:(CDVInvokedUrlCommand*)command {
+- (void)getPushPayload:(CDVInvokedUrlCommand*)command {
     
     self.pushDetailsCommandId = command.callbackId;
 }

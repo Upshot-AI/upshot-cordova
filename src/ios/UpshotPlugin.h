@@ -26,7 +26,7 @@
 
 // Plugin Methods
 - (void)getDeviceToken:(CDVInvokedUrlCommand*)command;
-- (void)getPushClickDetails:(CDVInvokedUrlCommand*)command;
+- (void)getPushPayload:(CDVInvokedUrlCommand*)command;
 - (void)registerForPushWithForeground:(CDVInvokedUrlCommand*)command;
 
 
