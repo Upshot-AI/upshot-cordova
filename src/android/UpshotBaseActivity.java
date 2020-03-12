@@ -24,9 +24,13 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import org.apache.cordova.CordovaActivity;
+import org.json.JSONObject;
+
+import cordova_plugin_upshotplugin.animpush.UpshotGifNotificationDeleteReceiver;
 
 public class UpshotBaseActivity extends CordovaActivity {
     @Override
@@ -42,8 +46,28 @@ public class UpshotBaseActivity extends CordovaActivity {
         if (intent != null) {
             boolean push = intent.getBooleanExtra("push", false);
             if (push) {
-                Log.i("test push", "bundle is not empty");
-                cordova_plugin_upshotplugin.UpshotPlugin.sendPushPayload(intent.getStringExtra("payload"));
+                try{
+
+                    Log.i("test push", "bundle is not empty");
+                    String payload = intent.getStringExtra("payload");
+
+                    JSONObject jsonObject = new JSONObject(payload);
+                    int notificationId = jsonObject.getInt("notificationId");
+                    String layoutType = jsonObject.getString("layoutType");
+                    if (layoutType != null && layoutType.equals("animated-msg")) {
+                        UpshotGifNotificationDeleteReceiver.removeAnimator(notificationId);
+
+                        final int finalNotificationId = notificationId;
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                                notificationManager.cancel(finalNotificationId);
+                            }
+                        }, 250);
+                    }
+                    cordova_plugin_upshotplugin.UpshotPlugin.sendPushPayload(payload);
+                } catch (Exception e){}
             }
         }
         createNotificationChannels();

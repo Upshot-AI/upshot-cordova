@@ -46,7 +46,7 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
 
     private final String BIG_IMAGE = "big-image";
     private final String BANNER = "banner";
-    private final String ANIMATED = "animated-msg";
+    public static final String ANIMATED = "animated-msg";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
