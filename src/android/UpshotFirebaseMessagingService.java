@@ -162,7 +162,7 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
         UpshotGifNotification gifNotification = new UpshotGifNotification(notificationManager) {
             @Override
             protected RemoteViews onCreateRemoteViews() {
-                return new RemoteViews(getPackageName(), R.layout.big_image_new_1);
+                return new RemoteViews(getPackageName(), R.layout.upshot_big_image);
             }
 
             @Override

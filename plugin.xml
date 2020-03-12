@@ -40,6 +40,10 @@
         <source-file src="src/android/animpush/UpshotGifNotificationDeleteReceiver.java" target-dir="src/cordova_plugin_upshotplugin/animpush" />
         <source-file src="src/android/animpush/UpshotGifUpdator.java" target-dir="src/cordova_plugin_upshotplugin/animpush" />
 
+        <source-file src="src/android/upshot_big_image.xml" target-dir="res/layout" />
+        <source-file src="src/android/upshot_simple_push_layout.xml" target-dir="res/layout" />
+
+
         <framework src="com.google.firebase:firebase-messaging:12.0.1" />
     </platform>
 
