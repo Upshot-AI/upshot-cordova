@@ -150,7 +150,8 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
         if (imageBitmap != null) {
             notificationBuilder.setStyle(new NotificationCompat.BigPictureStyle().bigPicture(imageBitmap));
 
-        }else if (layoutFileType.equals(ANIMATED)) {
+        }else if (layoutFileType != null && layoutFileType.equals(ANIMATED)) {
+
             showGifNotification(notificationManager, imageFilePath, context, title, text, mainActivity, jsonObject);
             return;
         }
