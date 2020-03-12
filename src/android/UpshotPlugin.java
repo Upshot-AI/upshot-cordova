@@ -27,14 +27,12 @@ public class UpshotPlugin extends CordovaPlugin {
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (action.equals("getDeviceToken")) {
-            String message = args.getString(0);
-            this.getDeviceToken(message, callbackContext);            
+            this.getDeviceToken(callbackContext);            
             return true;
         }
 
         if (action.equals("getPushPayload")) {
-            String message = args.getString(0);            
-            this.getPushPayload(message, callbackContext);
+            this.getPushPayload(callbackContext);
             return true;
         }
         return false;
@@ -78,7 +76,7 @@ public class UpshotPlugin extends CordovaPlugin {
     }
 
     //Plugin Methods
-    private void getDeviceToken(String message, CallbackContext callbackContext) {
+    private void getDeviceToken(CallbackContext callbackContext) {
 
         tokenCallbackContext = callbackContext;
         sendToken(FirebaseInstanceId.getInstance().getToken());
@@ -86,7 +84,7 @@ public class UpshotPlugin extends CordovaPlugin {
 
     }
 
-    private void getPushPayload(String message, CallbackContext callbackContext) {
+    private void getPushPayload(CallbackContext callbackContext) {
 
         pushCallbackContext = callbackContext;
         if (!TextUtils.isEmpty(pushPayload)) {
