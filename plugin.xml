@@ -6,7 +6,6 @@
             <feature name="UpshotPlugin"><param name="android-package" value="cordova_plugin_upshotplugin.UpshotPlugin" /></feature>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml" />
-
         <config-file parent="/manifest/application" target="AndroidManifest.xml" >
             <service android:name="cordova_plugin_upshotplugin.UpshotFirebaseMessagingService">
                 <intent-filter>
@@ -18,6 +17,7 @@
                     <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
                 </intent-filter>
             </service>
+            <receiver android:name="cordova_plugin_upshotplugin.animpush.UpshotGifNotificationDeleteReceiver"></receiver>
         </config-file>
 
         <source-file src="src/android/UpshotPlugin.java" target-dir="src/cordova_plugin_upshotplugin" />

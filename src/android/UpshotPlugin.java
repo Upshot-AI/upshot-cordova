@@ -6,6 +6,7 @@ import android.util.Log;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.PluginResult;
 import org.apache.cordova.CallbackContext;
 
 import org.json.JSONArray;
@@ -45,13 +46,14 @@ public class UpshotPlugin extends CordovaPlugin {
             if (!TextUtils.isEmpty(token)) {
                 
                 try {
-                    tokenCallbackContext.success(token);
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, token);
+                    pluginResult.setKeepCallback(true);
+                    tokenCallbackContext.sendPluginResult(pluginResult);                    
+                    // tokenCallbackContext.success(token);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else {
-                Log.d(TAG, "sendToken in plugin 3");
-
+            } else {                
                 tokenCallbackContext.error("Expected one non-empty string argument.");
             }
         }
@@ -66,7 +68,10 @@ public class UpshotPlugin extends CordovaPlugin {
             if (!TextUtils.isEmpty(payload)) {
 
                 try {
-                    pushCallbackContext.success(payload);
+                    // pushCallbackContext.success(payload);
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, payload);
+                    pluginResult.setKeepCallback(true);
+                    pushCallbackContext.sendPluginResult(pluginResult);                    
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -79,16 +84,13 @@ public class UpshotPlugin extends CordovaPlugin {
     private void getDeviceToken(CallbackContext callbackContext) {
 
         tokenCallbackContext = callbackContext;
-        sendToken(FirebaseInstanceId.getInstance().getToken());
-        Log.d(TAG, "getDeviceToken in plugin");
-
+        sendToken(FirebaseInstanceId.getInstance().getToken());        
     }
 
     private void getPushPayload(CallbackContext callbackContext) {
 
         pushCallbackContext = callbackContext;
-        if (!TextUtils.isEmpty(pushPayload)) {
-            Log.d(TAG, "sendPushPayload in plugin 2");
+        if (!TextUtils.isEmpty(pushPayload)) {            
             sendPushPayload(pushPayload);
         }
 

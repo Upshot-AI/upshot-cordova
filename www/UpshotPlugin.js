@@ -1,5 +1,6 @@
 var exec = require('cordova/exec');
 
+
 var UpshotPlugin = {
         
     initialize: function(params, callback) {
@@ -100,10 +101,10 @@ var UpshotPlugin = {
 
     sendDeviceToken: function(deviceToken, devicePlatform) {
         
-        if(devicePlatform == 'iOS') {
+        if(devicePlatform.toLowerCase() == 'ios') {
 
             upshot.updateUserProfile({'apnsToken': {"token": deviceToken}});
-        }  else if(devicePlatform == 'Android') {
+        }  else if(devicePlatform.toLowerCase() == 'android') {
             
             upshot.updateUserProfile({'gcmToken': {"token": deviceToken}});
         } 

@@ -46,15 +46,18 @@ public class UpshotBaseActivity extends CordovaActivity {
         if (intent != null) {
             boolean push = intent.getBooleanExtra("push", false);
             if (push) {
-                try{
+                try {
 
                     Log.i("test push", "bundle is not empty");
                     String payload = intent.getStringExtra("payload");
 
                     JSONObject jsonObject = new JSONObject(payload);
-                    int notificationId = jsonObject.getInt("notificationId");
                     String layoutType = jsonObject.getString("layoutType");
                     if (layoutType != null && layoutType.equals("animated-msg")) {
+                        int notificationId = jsonObject.getInt("gifNotificationId");
+//                        int notificationId = intent.getIntExtra("gifNotificationId", -1);
+                        Log.i("jsonObject", jsonObject.toString() + ",gifNotificationId :  " + notificationId);
+
                         UpshotGifNotificationDeleteReceiver.removeAnimator(notificationId);
 
                         final int finalNotificationId = notificationId;
@@ -67,29 +70,30 @@ public class UpshotBaseActivity extends CordovaActivity {
                         }, 250);
                     }
                     cordova_plugin_upshotplugin.UpshotPlugin.sendPushPayload(payload);
-                } catch (Exception e){}
+                } catch (Exception e) {
+                }
             }
         }
         createNotificationChannels();
     }
-    
+
     private void createNotificationChannels() {
-    try {
-    
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-    
-    NotificationChannel notificationChannel = new NotificationChannel("notifications", "notifications", NotificationManager.IMPORTANCE_HIGH);
-    notificationChannel.enableLights(true);
-    notificationChannel.enableVibration(true);
-    
-    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-    
-    if (notificationManager != null) {
-    notificationManager.createNotificationChannel(notificationChannel);
-    }
-    }
-    } catch (Exception e) {
-    }
+        try {
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+
+                NotificationChannel notificationChannel = new NotificationChannel("notifications", "notifications", NotificationManager.IMPORTANCE_HIGH);
+                notificationChannel.enableLights(true);
+                notificationChannel.enableVibration(true);
+
+                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                if (notificationManager != null) {
+                    notificationManager.createNotificationChannel(notificationChannel);
+                }
+            }
+        } catch (Exception e) {
+        }
     }
 
     @Override
