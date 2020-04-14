@@ -46,35 +46,39 @@ public class UpshotBaseActivity extends CordovaActivity {
         if (intent != null) {
             boolean push = intent.getBooleanExtra("push", false);
             if (push) {
-                try {
-
-                    Log.i("test push", "bundle is not empty");
-                    String payload = intent.getStringExtra("payload");
-
-                    JSONObject jsonObject = new JSONObject(payload);
-                    String layoutType = jsonObject.getString("layoutType");
-                    if (layoutType != null && layoutType.equals("animated-msg")) {
-                        int notificationId = jsonObject.getInt("gifNotificationId");
-//                        int notificationId = intent.getIntExtra("gifNotificationId", -1);
-                        Log.i("jsonObject", jsonObject.toString() + ",gifNotificationId :  " + notificationId);
-
-                        UpshotGifNotificationDeleteReceiver.removeAnimator(notificationId);
-
-                        final int finalNotificationId = notificationId;
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                                notificationManager.cancel(finalNotificationId);
-                            }
-                        }, 250);
-                    }
-                    cordova_plugin_upshotplugin.UpshotPlugin.sendPushPayload(payload);
-                } catch (Exception e) {
-                }
+                performUpshotPushOperation(intent);
             }
         }
         createNotificationChannels();
+    }
+
+    private void performUpshotPushOperation(Intent intent) {
+        try {
+
+            Log.i("test push", "bundle is not empty");
+            String payload = intent.getStringExtra("payload");
+
+            JSONObject jsonObject = new JSONObject(payload);
+            String layoutType = jsonObject.getString("layoutType");
+            if (layoutType != null && layoutType.equals("animated-msg")) {
+                int notificationId = jsonObject.getInt("gifNotificationId");
+//                        int notificationId = intent.getIntExtra("gifNotificationId", -1);
+                Log.i("jsonObject", jsonObject.toString() + ",gifNotificationId :  " + notificationId);
+
+                UpshotGifNotificationDeleteReceiver.removeAnimator(notificationId);
+
+                final int finalNotificationId = notificationId;
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                        notificationManager.cancel(finalNotificationId);
+                    }
+                }, 250);
+            }
+            cordova_plugin_upshotplugin.UpshotPlugin.sendPushPayload(payload);
+        } catch (Exception e) {
+        }
     }
 
     private void createNotificationChannels() {
@@ -101,7 +105,7 @@ public class UpshotBaseActivity extends CordovaActivity {
         super.onNewIntent(intent);
         boolean push = intent.getBooleanExtra("push", false);
         if (push) {
-            cordova_plugin_upshotplugin.UpshotPlugin.sendPushPayload(intent.getStringExtra("payload"));
+            performUpshotPushOperation(intent);
         }
     }
 }

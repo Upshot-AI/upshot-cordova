@@ -196,7 +196,7 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent,
                         PendingIntent.FLAG_ONE_SHOT);
-                remoteViews.setOnClickPendingIntent(R.id.push_image, pendingIntent);
+                remoteViews.setOnClickPendingIntent(R.id.root_push_layout, pendingIntent);
 
                 Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
