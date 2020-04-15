@@ -58,6 +58,7 @@ public class UpshotBaseActivity extends CordovaActivity {
             Log.i("test push", "bundle is not empty");
             String payload = intent.getStringExtra("payload");
 
+            cordova_plugin_upshotplugin.UpshotPlugin.sendPushPayload(payload);
             JSONObject jsonObject = new JSONObject(payload);
             String layoutType = jsonObject.getString("layoutType");
             if (layoutType != null && layoutType.equals("animated-msg")) {
@@ -76,7 +77,6 @@ public class UpshotBaseActivity extends CordovaActivity {
                     }
                 }, 250);
             }
-            cordova_plugin_upshotplugin.UpshotPlugin.sendPushPayload(payload);
         } catch (Exception e) {
         }
     }
