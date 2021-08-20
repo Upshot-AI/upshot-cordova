@@ -5,7 +5,6 @@
     android:id="@+id/root_push_layout"
     android:background="@android:color/white">
 
-
     <include
         android:id="@+id/main_push_layout"
         layout="@layout/upshot_simple_push_layout"

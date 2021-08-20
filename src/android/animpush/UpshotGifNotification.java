@@ -63,6 +63,17 @@ public abstract class UpshotGifNotification {
 
     }
 
+    public void showNotification(Bitmap bitmap, int remoteImageViewId) throws FileNotFoundException {
+        remoteViews = onCreateRemoteViews();
+        notificationId = (int) (System.currentTimeMillis() % 100); // uniq id for the notification
+        notification = onCreateNotification(remoteViews, notificationId);
+        notification.flags |= Notification.FLAG_ONLY_ALERT_ONCE;
+        notificationManager.notify(notificationId, notification);
+        remoteViews.setImageViewBitmap(remoteImageViewId, bitmap);
+        notificationManager.notify(notificationId, notification);
+        UpshotGifNotificationDeleteReceiver.addAnimator(notificationId, gifAnimator);
+      }
+
     /**
      * this should be the called first on contentIntent and deleteIntent  receiver.
      */

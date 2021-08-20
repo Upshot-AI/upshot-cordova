@@ -3,6 +3,11 @@
 #import <Cordova/CDV.h>
 #import <Cordova/CDVPlugin.h>
 #import "UpshotPlugin.h"
+#import "UpshotShareViewController.h"
+#import "UpshotWebRedirectController.h"
+#import "UpshotWindowManager.h"
+#import "UpshotStoreViewController.h"
+
 @import UserNotifications;
 
 @interface UpshotPlugin () <UNUserNotificationCenterDelegate>
@@ -26,6 +31,14 @@
 - (void)getPushPayload:(CDVInvokedUrlCommand*)command {
     
     self.pushDetailsCommandId = command.callbackId;
+     if (_pushDetails != nil) {
+        
+        NSString *message = [self getJsonStringFromDict:_pushDetails];
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:message];
+        [pluginResult setKeepCallbackAsBool:YES];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:_pushDetailsCommandId];
+
+    }
 }
 
 - (void)registerForPushWithForeground:(CDVInvokedUrlCommand*)command {
@@ -60,6 +73,27 @@
     });    
 }
 
+- (void)redirectionCallback:(CDVInvokedUrlCommand*)command {
+    
+    NSString *jsonString = command.arguments[0];
+    NSDictionary *jsonData = [self getJsonFromString:jsonString];
+    NSInteger type = [jsonData[@"type"] integerValue];
+    NSString *deeplink = jsonData[@"deeplink"];
+    if (type == 5 || type == 4) {
+        [self customRedirection:deeplink];
+    } else if(type == 3) {
+        [self webRedirection:deeplink];
+    } else if (type == 1) {
+        [self storeRedirection:deeplink];
+    }
+}
+
+- (void)shareCallback:(CDVInvokedUrlCommand*)command {
+    
+    NSString *jsonString = command.arguments[0];
+    [self share:jsonString];
+}
+
 #pragma mark Internal Methods
 
 - (void)didRegisterForRemoteNotificationWithDeviceToken:(NSString *)token {
@@ -90,7 +124,7 @@
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:message];
         [pluginResult setKeepCallbackAsBool:YES];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:_pushDetailsCommandId];
-
+        _pushDetails = nil;
     }
 }
 
@@ -108,4 +142,44 @@
     NSString *json = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     return json;
 }
+
+- (NSDictionary *)getJsonFromString:(NSString *)jsonString {
+    
+    NSData *data = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil];
+    return json;
+}
+
+- (void)webRedirection:(NSString *)webUrl {
+    
+    NSURL *url = [NSURL URLWithString:webUrl];
+    UpshotWebRedirectController *vc = [[UpshotWebRedirectController alloc] initWithNibName:@"UpshotWebRedirectController" bundle:[NSBundle mainBundle]];
+    vc.redirectURL = url;
+    [[UpshotWindowManager defaultManager] showUpshotWindow:vc];
+}
+
+- (void)storeRedirection:(NSString *)storeId {
+    
+    UpshotStoreViewController *vc = [[UpshotStoreViewController alloc] initWithNibName:@"UpshotStoreViewController" bundle:[NSBundle mainBundle]];
+    vc.storeId = [NSNumber numberWithDouble:[storeId doubleValue]];
+    [[UpshotWindowManager defaultManager] showUpshotWindow:vc];
+}
+
+- (void)customRedirection:(NSString *)redirectionUrl {
+    
+    NSURL *url = [NSURL URLWithString:redirectionUrl];
+    if (url != nil && [[UIApplication sharedApplication] canOpenURL:url]) {
+        [[UIApplication sharedApplication] openURL:url options:@{} completionHandler: nil];
+    }
+}
+
+- (void)share:(NSString *)shareData {
+    
+    NSData *data = [shareData dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    UpshotShareViewController *vc = [[UpshotShareViewController alloc] init];
+    vc.shareData = json;
+    [[UpshotWindowManager defaultManager] showUpshotWindow:vc];
+}
+
 @end

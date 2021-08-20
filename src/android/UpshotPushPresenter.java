@@ -13,7 +13,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
 import android.util.Log;
 
 import com.purpletalk.upshot.MainActivity;
@@ -94,7 +94,7 @@ public class UpshotPushPresenter {
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context,"notifications")
                 .setSmallIcon(android.R.drawable.ic_menu_add)
                 .setContentTitle(title)
                 .setContentText(text)
@@ -105,7 +105,8 @@ public class UpshotPushPresenter {
 
         if (imageBitmap != null) {
             notificationBuilder.setStyle(new NotificationCompat.BigPictureStyle().bigPicture(imageBitmap));
-
+        } else {
+            notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(text));
         }
         addChannelSupport(context, notificationBuilder);
         NotificationManager notificationManager =
@@ -212,8 +213,6 @@ public class UpshotPushPresenter {
             } catch (Exception e) {
             }
         }
-
-
     }
 
     private  void addChannelSupport(Context context, NotificationCompat.Builder notificationBuilder) {

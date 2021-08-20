@@ -1,0 +1,24 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/close_button" />
+
+    <Button
+    android:id="@+id/close_button"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:background="#468CBB"
+    android:textAlignment="textEnd"
+    android:paddingRight="8dp"
+    android:textColor="#FFFFFF"
+    android:height="45dp"
+    android:textSize="16dp"
+    android:text="Done" />
+
+</RelativeLayout>

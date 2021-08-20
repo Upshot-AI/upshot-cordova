@@ -5,6 +5,8 @@ var UpshotPlugin = {
         
     initialize: function(params, callback) {
 
+        this.addListeners();
+        params["upshotNewInstall"] = !this.isUserExist();
         upshot.init( params, callback);            
     },
 
@@ -18,9 +20,9 @@ var UpshotPlugin = {
         exec(success,null,'UpshotPlugin','getPushPayload',[]);
     },
 
-    registerForPushWithForeground: function(arguments, status) {
+    registerForPushWithForeground: function(shouldEnable, status) {
 
-    	exec(status, null, 'UpshotPlugin', 'registerForPushWithForeground', [arguments]);
+    	exec(status, null, 'UpshotPlugin', 'registerForPushWithForeground', [shouldEnable]);
     },        
 
     updateUserProfile: function(params, callback) {
@@ -113,21 +115,35 @@ var UpshotPlugin = {
     pushClickEvent: function(payload) {
 
         upshot.pushClickEvent(JSON.parse(payload));
-    },
-
-    sendPushDetails: function(pushPayload, callback) {
-
-        upshot.sendPushDetails(pushPayload, callback);
-    },
+    },    
 
     sendLocation: function(locationObj) {
 
         upshot.sendLocation(locationObj);
     },
+     
+    addListeners: function() {
+        window.addEventListener('UpshotActivityShared', function(data) {
+            exec(null, null, 'UpshotPlugin', 'shareCallback', [JSON.stringify(data.detail)]);
+        }, false);
+        window.addEventListener('UpshotActivityRedirectionCallback', function(data) {
+            exec(null, null, 'UpshotPlugin', 'redirectionCallback', [JSON.stringify(data.detail)]);
+        }, false);
+    },
 
-    subscribePush: function() {
+    isUserExist: function() {
 
-        upshot.subscribePush(); 
+        var upshotData = window.localStorage.getItem("upshotData");
+        if (upshotData != undefined) {
+            var upshotJsonData = JSON.parse(upshotData);
+            var userId = upshotJsonData["upshotUserID"] ? upshotJsonData["upshotUserID"] : "";
+            if (userId == "" || userId == undefined) {
+                return false
+            }
+            return true
+        } else {
+            return false
+        }        
     }
 }
 
