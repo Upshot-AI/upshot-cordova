@@ -54,18 +54,14 @@ public class UpshotBaseActivity extends CordovaActivity {
 
     private void performUpshotPushOperation(Intent intent) {
         try {
-
-            Log.i("test push", "bundle is not empty");
+            
             String payload = intent.getStringExtra("payload");
 
             cordova_plugin_upshotplugin.UpshotPlugin.sendPushPayload(payload);
             JSONObject jsonObject = new JSONObject(payload);
             String layoutType = jsonObject.getString("layoutType");
-            if (layoutType != null && layoutType.equals("animated-msg")) {
+            if (layoutType != null && !layoutType.equals("icon")) {
                 int notificationId = jsonObject.getInt("gifNotificationId");
-//                        int notificationId = intent.getIntExtra("gifNotificationId", -1);
-                Log.i("jsonObject", jsonObject.toString() + ",gifNotificationId :  " + notificationId);
-
                 UpshotGifNotificationDeleteReceiver.removeAnimator(notificationId);
 
                 final int finalNotificationId = notificationId;

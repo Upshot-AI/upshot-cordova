@@ -211,15 +211,24 @@ private void shareCallback(String shareData) {
     
       public Uri getImageUri(Context inContext, String imageInBase64) {
         final String pureBase64Encoded = imageInBase64.substring(imageInBase64.indexOf(",")  + 1);
-    
+
         final byte[] imgBytesData = android.util.Base64.decode(pureBase64Encoded,
           android.util.Base64.DEFAULT);
         Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytesData, 0, imgBytesData.length);
-    
+
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), bitmap, "Title", null);
-        return Uri.parse(path);
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
+
+        File file = new File(inContext.getExternalCacheDir(), "iam_image.png");
+        if (file.exists()) {
+          file.delete();
+        }
+        try {
+          bitmap.compress(Bitmap.CompressFormat.PNG, 100, new FileOutputStream(file));
+        } catch (FileNotFoundException e) {
+          e.printStackTrace();
+        }
+        return Uri.fromFile(file);
       }
 
     private void redirectToCustomUri(String actionValue) {
