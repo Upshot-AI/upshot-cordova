@@ -26,6 +26,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+
 import androidx.annotation.NonNull;
 /**
  * This class echoes a string called from JavaScript.
