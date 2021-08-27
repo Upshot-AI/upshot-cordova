@@ -185,7 +185,10 @@ private void shareCallback(String shareData) {
         
         final String storePrefix = "https://play.google.com/store/apps/details?id=";
         if (url.contains(storePrefix)) {
-            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+          Intent sendIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+          sendIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+          sendIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+          context.startActivity(sendIntent);
         } else {
             redirectToCustomUri(url);
         }
@@ -208,7 +211,8 @@ private void shareCallback(String shareData) {
             textToShare);
           sendIntent.setType("text/plain");
         }
-    
+        sendIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+        sendIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
         sendIntent.setAction(Intent.ACTION_SEND);
         context.startActivity(sendIntent);
       }
@@ -247,6 +251,8 @@ private void shareCallback(String shareData) {
             }
 
             Intent redirectionIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(actionValue));
+            redirectionIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+            redirectionIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
             if (redirectionIntent.resolveActivity(context.getPackageManager()) != null) {
                 context.startActivity(redirectionIntent);
             }
@@ -293,6 +299,8 @@ private void shareCallback(String shareData) {
           try {
             String uri = "tel://" + contactNumber;
             Intent dialIntent = new Intent(Intent.ACTION_DIAL, Uri.parse(uri));
+            dialIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+            dialIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(dialIntent);
             return true;
           } catch (ActivityNotFoundException exp) {
@@ -317,7 +325,11 @@ private void shareCallback(String shareData) {
         actionValue = actionValue.trim();
         Bundle bundle = new Bundle();
         bundle.putString("url", actionValue);
-        (context).startActivity(new Intent(context, UpshotWebRedirection.class).putExtras(bundle));
+        Intent intent =  new Intent(context, UpshotWebRedirection.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtras(bundle);
+        (context).startActivity(intent);
       }
 
     

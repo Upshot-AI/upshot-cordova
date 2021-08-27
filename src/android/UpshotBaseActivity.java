@@ -26,7 +26,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-
+import android.os.StrictMode;
 import org.apache.cordova.CordovaActivity;
 import org.json.JSONObject;
 
@@ -36,6 +36,9 @@ public class UpshotBaseActivity extends CordovaActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
 
         if (savedInstanceState != null) {
             Log.i("test push", "bundle is not empty");
