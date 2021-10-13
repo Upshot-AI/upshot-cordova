@@ -53,6 +53,11 @@ var UpshotPlugin = {
         return upshot.createEventByName(eventName, payload, isTimed);    
     },
 
+    createAttributionEvent: function(payload) {
+
+        return upshot.createAttributionEvent(payload)
+    },
+
     setDataAndCloseEvent: function(eventId, params) {
 
         upshot.setDataAndCloseEvent(eventId, params)

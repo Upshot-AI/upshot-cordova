@@ -13,10 +13,8 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.core.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-
-import com.purpletalk.upshot.MainActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -84,7 +82,20 @@ public class UpshotPushPresenter {
 
     private  void displayPushNotification(Map<String, String> messageBody, String title, String text, Bitmap imageBitmap, Context context) {
         JSONObject jsonObject = new JSONObject(messageBody);
-        Intent intent = new Intent(context, MainActivity.class);
+        Class mainActivity = null;
+
+        String packageName = context.getPackageName();
+        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+        String className = launchIntent.getComponent().getClassName();
+        try { //loading the Main Activity to not import it in the plugin
+                mainActivity = Class.forName(className);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (mainActivity == null) {
+            return;
+        }
+        Intent intent = new Intent(context, mainActivity);
         intent.putExtra("push", true);
         intent.putExtra("payload", jsonObject.toString());
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

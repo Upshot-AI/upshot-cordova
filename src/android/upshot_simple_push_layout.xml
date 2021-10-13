@@ -23,6 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Title"
+        android:maxLines="2"
         style="@style/TextAppearance.Compat.Notification.Title"/>
 
       <TextView
@@ -31,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
         android:ellipsize="end"
-        android:maxLines="5"
+        android:maxLines="4"
         android:text="Message"
         android:textSize="13dp"
         style="@style/TextAppearance.Compat.Notification.Info"/>

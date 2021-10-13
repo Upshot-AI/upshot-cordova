@@ -1,25 +1,14 @@
-//***************************************************************************************************
-//***************************************************************************************************
-//      Project Name                    	    : BrandKinesis
-//      Class Name                              : BKAdsWebActivity
-//      Author                                  : PurpleTalk
-//***************************************************************************************************
-//     Class Description: Activity to be launched whenever any in - app web redirections are to
-// be performed  from IAM
-//
-//***************************************************************************************************
-//***************************************************************************************************
 package cordova_plugin_upshotplugin;
 
 import android.app.Activity;
+import android.app.Application;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-
-import com.purpletalk.upshot.R;
 
 public class UpshotWebRedirection extends Activity {
 
@@ -35,11 +24,14 @@ public class UpshotWebRedirection extends Activity {
     // init default values
     init();
 
-
+    Resources resources = getApplicationResources();
+    String packageName = getApplicationPackageName();
+    int layout = resources.getIdentifier("upshot_web_redirection", "layout", packageName);
+    int close_buttonId = resources.getIdentifier("close_button", "id", packageName);
     // set content view
-    setContentView(R.layout.upshot_web_redirection);
+    setContentView(layout);
 
-    Button button = (Button) findViewById(R.id.close_button);
+    Button button = (Button) findViewById(close_buttonId);
     button.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -68,7 +60,11 @@ public class UpshotWebRedirection extends Activity {
    * Initialize web view
    */
   private void initWebView() {
-    mWebView = (WebView) findViewById(R.id.webview);
+
+    Resources resources = getApplicationResources();
+    String packageName = getApplicationPackageName();
+    int webviewId = resources.getIdentifier("webview", "id", packageName);
+    mWebView = (WebView) findViewById(webviewId);
     mWebView.setWebViewClient(new CustomWebViewClient());
     mWebView.getSettings().setJavaScriptEnabled(true);
     mWebView.loadUrl(mUrl);
@@ -90,8 +86,18 @@ public class UpshotWebRedirection extends Activity {
     super.onDestroy();
     // reset web view
     mWebView.loadUrl("about:blank");
+  }
 
+  private Resources getApplicationResources() {
+    Application app = getApplication();
+    Resources resources = app.getResources();
+    return resources;
+  }
 
+  private String getApplicationPackageName() {
+    Application app = getApplication();
+    String packageName = app.getPackageName();
+    return packageName;
   }
 
   /**

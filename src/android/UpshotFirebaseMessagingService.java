@@ -1,5 +1,6 @@
 package cordova_plugin_upshotplugin;
 
+import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -8,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -19,6 +21,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -26,7 +29,6 @@ import android.widget.RemoteViews;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import com.purpletalk.upshot.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,9 +41,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.core.app.NotificationCompat;
+import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
 
 import cordova_plugin_upshotplugin.animpush.UpshotEnhancedPushUtils;
 import cordova_plugin_upshotplugin.animpush.UpshotGifNotification;
@@ -53,17 +55,10 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
   private static final String TAG = UpshotFirebaseMessagingService.class.getSimpleName();
   private static String activityDirPath = "";
 
-
   private final String BIG_IMAGE = "big-image";
   private final String BANNER = "banner";
   public static final String ANIMATED = "animated-msg";
   public static final String ICON = "icon";
-
-  @Override
-  public void onNewToken(@NonNull String token) {
-    super.onNewToken(token);
-    UpshotPlugin.sendToken(token);
-  }
 
   @Override
   public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -79,6 +74,18 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
     }
   }
 
+  private Resources getApplicationResources() {
+    Application app = getApplication();
+    Resources resources = app.getResources();
+    return resources;
+  }
+
+  private String getApplicationPackageName() {
+    Application app = getApplication();
+    String packageName = app.getPackageName();
+    return packageName;
+  }
+
   //This method is only generating push notification
   private void sendNotification(Map<String, String> messageBody, Bundle pushPayload) {
 
@@ -90,7 +97,6 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
         text = pushPayload.containsKey("bk") ? pushPayload.getString("alert") : messageBody.toString();
       } else {
         try {
-
           title = pushPayload.getString("title");
           text = pushPayload.getString("body");
         } catch (Exception e) {
@@ -101,6 +107,10 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
 
         String fileName = pushPayload.getString("fileName");
         String url = pushPayload.getString("bundle_url");
+        if (fileName.isEmpty()) {
+          displayPushNotification(messageBody, title, text, null, null, null);
+          return;
+        }
 
         downloadEnhancedPushPackage(fileName, url, title, text, messageBody);
         return;
@@ -108,6 +118,7 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
 
       displayPushNotification(messageBody, title, text, null, null, null);
     } catch (Exception e) {
+      e.printStackTrace();
     }
 
   }
@@ -138,21 +149,22 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
 
     }
 
-    NotificationManager notificationManager =
-      (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-    if (layoutFileType != null && !layoutFileType.equals(ICON)) {
-      showGifNotification(notificationManager, imageFilePath, context, title, text, mainActivity, jsonObject, imageBitmap);
-      return;
-    }
+      if (layoutFileType != null && layoutFileType.equals(ANIMATED)) {
+
+        showGifNotification(notificationManager, imageFilePath, context, title, text, mainActivity, jsonObject, imageBitmap);
+        return;
+      } else if (layoutFileType != null && ((layoutFileType.equals(BIG_IMAGE)) || layoutFileType.equals(BANNER))) {
+        showBigImageNotification(notificationManager, imageFilePath, context, title, text, mainActivity, jsonObject, imageBitmap);
+        return;
+      }
 
     Intent notifyIntent = new Intent(this, mainActivity);
     notifyIntent.putExtra("push", true);
     notifyIntent.putExtra("payload", jsonObject.toString());
 // Create the PendingIntent
-    PendingIntent pendingIntent = PendingIntent.getActivity(
-      this, notificationId, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT
-    );
+    PendingIntent pendingIntent = PendingIntent.getActivity(this, notificationId, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
     Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
@@ -172,36 +184,96 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
     if (layoutFileType != null && layoutFileType.equals(ICON)) {
       notificationBuilder.setLargeIcon(imageBitmap);
       notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(text));
-    } else if (imageBitmap != null) {
-      notificationBuilder.setStyle(new NotificationCompat.BigPictureStyle().bigPicture(imageBitmap));
     } else {
       notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(text));
     }
     notificationManager.notify(notificationId, notificationBuilder.build());
   }
 
+  private void showBigImageNotification(NotificationManager notificationManager, String imageFilePath, Context context, String title, String contentMsg, Class mainActivity, JSONObject jsonObject, Bitmap imageBitMap) {
+
+    Resources resources = getApplicationResources();
+    String packageName = getApplicationPackageName();
+    int layout = resources.getIdentifier("upshot_big_image", "layout", packageName);
+    int push_image_id = resources.getIdentifier("push_image", "id", packageName);
+
+    RemoteViews remoteViews = new RemoteViews(packageName, layout);
+    remoteViews.setImageViewBitmap(push_image_id, imageBitMap);
+
+    int notificationId = UpshotEnhancedPushUtils.getIdFromTimestamp();
+
+    Intent notifyIntent = new Intent(this, mainActivity);
+    notifyIntent.putExtra("push", true);
+    notifyIntent.putExtra("payload", jsonObject.toString());
+// Create the PendingIntent
+    PendingIntent pendingIntent = PendingIntent.getActivity(this, notificationId, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+    int color = 0x008000;
+    int applicationIcon = UpshotEnhancedPushUtils.getApplicationIcon(this);
+    Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+    NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "notifications")
+      .setSmallIcon(applicationIcon)
+      .setAutoCancel(true)
+      .setContentIntent(pendingIntent)
+      .setContentTitle(title)
+      .setContentText(contentMsg)
+      .setSound(defaultSoundUri)
+      .setOngoing(false);
+
+    builder.setStyle(new NotificationCompat.BigPictureStyle().bigPicture(imageBitMap));
+    builder.setStyle(new NotificationCompat.DecoratedCustomViewStyle());
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      builder.setCategory(Notification.CATEGORY_MESSAGE);
+    }
+    addChannelSupport(this, builder);
+
+    int push_title_text_Id = resources.getIdentifier("push_title_text", "id", packageName);
+    int push_msg_text_id = resources.getIdentifier("push_msg_text", "id", packageName);
+
+    remoteViews.setTextViewText(push_title_text_Id, title);
+    remoteViews.setTextViewText(push_msg_text_id, contentMsg);
+
+    Bitmap appIconBitmap = getApplicationIcon(context);
+    if (appIconBitmap != null) {
+      int app_icon_image_Id = resources.getIdentifier("app_icon_image", "id", packageName);
+      remoteViews.setImageViewBitmap(app_icon_image_Id, appIconBitmap);
+    }
+    builder.setContent(remoteViews);
+    builder.setCustomBigContentView(remoteViews);
+    notificationManager.notify(notificationId, builder.build());
+  }
   private void showGifNotification(NotificationManager notificationManager, String imageFilePath, Context context, String title, String contentMsg, Class mainActivity, JSONObject jsonObject, Bitmap imageBitMap) {
 
     UpshotGifNotification gifNotification = new UpshotGifNotification(notificationManager) {
       @Override
       protected RemoteViews onCreateRemoteViews() {
-        return new RemoteViews(getPackageName(), R.layout.upshot_big_image);
+
+        Resources resources = getApplicationResources();
+        String packageName = getApplicationPackageName();
+        int layout = resources.getIdentifier("upshot_big_image", "layout", packageName);
+        return new RemoteViews(getPackageName(), layout);
       }
 
       @Override
       protected Notification onCreateNotification(RemoteViews remoteViews, int notificationId) {
 
-        remoteViews.setTextViewText(R.id.push_title_text, title);
-        remoteViews.setTextViewText(R.id.push_msg_text, contentMsg);
+        Resources resources = getApplicationResources();
+        String packageName = getApplicationPackageName();
+        int push_title_text_Id = resources.getIdentifier("push_title_text", "id", packageName);
+        int push_msg_text_id = resources.getIdentifier("push_msg_text", "id", packageName);
+
+        remoteViews.setTextViewText(push_title_text_Id, title);
+        remoteViews.setTextViewText(push_msg_text_id, contentMsg);
         if (title.isEmpty()) {
-          remoteViews.setViewVisibility(R.id.push_title_text, View.GONE);
+          remoteViews.setViewVisibility(push_title_text_Id, View.GONE);
         }
 
         Bitmap appIconBitmap = getApplicationIcon(context);
         if (appIconBitmap != null) {
-          remoteViews.setImageViewBitmap(R.id.app_icon_image, appIconBitmap);
+          int app_icon_image_Id = resources.getIdentifier("app_icon_image", "id", packageName);
+          remoteViews.setImageViewBitmap(app_icon_image_Id, appIconBitmap);
         }
-
 
         try {
           jsonObject.put("gifNotificationId", notificationId);
@@ -216,7 +288,8 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
           context, notificationId, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT
         );
 
-        remoteViews.setOnClickPendingIntent(R.id.root_push_layout, pendingIntent);
+        int root_push_layout_Id = resources.getIdentifier("root_push_layout", "id", packageName);
+        remoteViews.setOnClickPendingIntent(root_push_layout_Id, pendingIntent);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
@@ -224,6 +297,8 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
         Bitmap iconBitmap = BitmapFactory.decodeResource(getResources(), applicationIcon);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, "notifications")
           .setSmallIcon(applicationIcon)
+          .setContentTitle(title)
+          .setContentText(contentMsg)
           .setAutoCancel(true)
           .setSound(defaultSoundUri)
           .setContentIntent(pendingIntent)
@@ -239,12 +314,10 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
       }
     };
     try {
-      if (imageBitMap == null) {
-        gifNotification.showNotification(imageFilePath, R.id.push_image);
-      } else {
-        gifNotification.showNotification(imageBitMap, R.id.push_image);
-      }
-
+      Resources resources = getApplicationResources();
+      String packageName = getApplicationPackageName();
+      int push_image_id = resources.getIdentifier("push_image", "id", packageName);
+      gifNotification.showNotification(imageFilePath, push_image_id);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
@@ -313,6 +386,7 @@ public class UpshotFirebaseMessagingService extends FirebaseMessagingService {
   }
 
   private void showImageBasedNotification(String fileName, String title, String contentMessage, Map<String, String> messageBody) {
+
     String txtFilePath = activityDirPath + File.separator + "json.txt";
     String imageName = "";
     JSONObject unitdata = null;
