@@ -15,6 +15,7 @@
 @property (nonatomic, strong) NSString *deviceToken;
 @property (nonatomic, strong) NSString *deviceTokenCommandId;
 @property (nonatomic, strong) NSString *pushDetailsCommandId;
+@property (nonatomic, strong) NSString *carouselDeeplinkCommandId;
 @property (nonatomic, strong) NSDictionary *pushDetails;
 @property (nonatomic, strong) NSString *resgiterCommandId;
 @property (nonatomic, assign) BOOL allowForegroundPush;

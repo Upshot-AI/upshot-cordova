@@ -1,28 +1,40 @@
 package cordova_plugin_upshotplugin;
 
+import android.annotation.TargetApi;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
-import com.google.firebase.iid.FirebaseInstanceId;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import com.upshot.push.lib.BrandKinesis;
+import com.upshot.push.lib.callbacks.UpshotFBTokenCallback;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import android.os.StrictMode;
 
 /**
  * This class echoes a string called from JavaScript.
@@ -32,11 +44,15 @@ public class UpshotPlugin extends CordovaPlugin {
   private static final String TAG = UpshotPlugin.class.getName();
   private static CallbackContext tokenCallbackContext;
   private static CallbackContext pushCallbackContext;
+  private static CallbackContext carouselCallbackContext;
   private static String pushPayload;
+  private static String carouselPushPayload;
+
   long lastClickTime = 0;
 
   @Override
   public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+
     if (action.equals("getDeviceToken")) {
       this.getDeviceToken(callbackContext);
       return true;
@@ -54,10 +70,33 @@ public class UpshotPlugin extends CordovaPlugin {
     if (action.equals("shareCallback")) {
       this.shareCallback(args.getString(0));
     }
+
+    if (action.equals("registerPushChannels")) {
+      this.registerChannels();
+    }
+
+    if (action.equals("getCarouselDeeplink")) {
+      getCarouselDeeplink(callbackContext);
+      return true;
+    }
+
+    if (action.equals("getDefaultAccountAndUserDetails")) {
+      this.getAccountDetails(args.getString(0))
+    }
     return false;
   }
 
   //Plugin Methods
+
+  private void getAccountDetails(String data) {
+    try {
+      JSONObject accountDetails = new JSONObject(data);
+      
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+  }
+
   private void getDeviceToken(CallbackContext callbackContext) {
     tokenCallbackContext = callbackContext;
     fetchTokenFromFirebaseSdk();
@@ -101,8 +140,72 @@ public class UpshotPlugin extends CordovaPlugin {
     }
   }
 
+  private void registerChannels() {
+
+    StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+    StrictMode.setVmPolicy(builder.build());
+    createNotificationChannels();
+  }
+
+  private void getCarouselDeeplink(CallbackContext callbackContext) {
+    carouselCallbackContext = callbackContext;
+    if (!TextUtils.isEmpty(carouselPushPayload)) {
+      sendCarouselPayload(carouselPushPayload);
+    }
+  }
+
+  // Utility Methods
+
+  @TargetApi(Build.VERSION_CODES.O)
+    private void createNotificationChannels() {
+        String notificationsChannelId = "notifications";
+        Context context = this.cordova.getActivity().getApplicationContext();
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        List<NotificationChannel> channels = notificationManager.getNotificationChannels();
+        NotificationChannel existingChanel = null;
+        int count = 0;
+        for (NotificationChannel channel : channels) {
+            String fullId = channel.getId();
+            if (fullId.contains(notificationsChannelId)) {
+                existingChanel = channel;
+                String[] numbers = extractRegexMatches(fullId, "\\d+");
+                if (numbers.length > 0) {
+                    count = Integer.valueOf(numbers[0]);
+                }
+                break;
+            }
+        }
+        if (existingChanel != null) {
+            if (existingChanel.getImportance() < NotificationManager.IMPORTANCE_DEFAULT) {
+                notificationManager.deleteNotificationChannel(existingChanel.getId());
+            }
+        }
+
+        String newId = existingChanel == null ? notificationsChannelId + '_' + (count + 1) : existingChanel.getId();
+        NotificationChannel channel = new NotificationChannel(
+                newId, notificationsChannelId, NotificationManager.IMPORTANCE_HIGH);
+        channel.setLightColor(Color.GREEN);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+        notificationManager.createNotificationChannel(channel);
+    }
+
+    public String[] extractRegexMatches(String source, String regex) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(source);
+
+        ArrayList<String> matches = new ArrayList<>();
+        while (matcher.find()) {
+            matches.add(matcher.group());
+        }
+
+        String[] result = new String[matches.size()];
+        matches.toArray(result);
+        return result;
+    }
+
   public static void sendToken(String token) {
-     
+
     if (tokenCallbackContext != null) {
       if (!TextUtils.isEmpty(token)) {
         try {
@@ -134,13 +237,35 @@ public class UpshotPlugin extends CordovaPlugin {
     }
   }
 
-  private void fetchTokenFromFirebaseSdk() {
-    try {
-      String token = FirebaseInstanceId.getInstance().getToken();
-      sendToken(token);
-    } catch (Exception e) {
-      e.printStackTrace();
+  public static void sendCarouselPayload(String payload) {
+
+    carouselPushPayload = payload;
+    if (carouselCallbackContext != null) {
+      carouselPushPayload = null;
+      if (!TextUtils.isEmpty(payload)) {
+        try {
+          PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, payload);
+          pluginResult.setKeepCallback(true);
+          carouselCallbackContext.sendPluginResult(pluginResult);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
     }
+  }
+
+  private void fetchTokenFromFirebaseSdk() {
+    BrandKinesis.getBKInstance().fetchTokenFromFirebaseSdk(new UpshotFBTokenCallback() {
+      @Override
+      public void onTokenReceivedSuccess(String s) {
+        sendToken(s);
+      }
+
+      @Override
+      public void onTokenReceivedFail() {
+
+      }
+    });
   }
 
   private void redirectionToStore(String url) {

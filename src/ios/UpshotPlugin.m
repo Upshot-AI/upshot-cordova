@@ -3,11 +3,7 @@
 #import <Cordova/CDV.h>
 #import <Cordova/CDVPlugin.h>
 #import "UpshotPlugin.h"
-#import "UpshotShareViewController.h"
-#import "UpshotWebRedirectController.h"
-#import "UpshotWindowManager.h"
-#import "UpshotStoreViewController.h"
-
+@import UpshotCordovaPlugin;
 @import UserNotifications;
 
 @interface UpshotPlugin () <UNUserNotificationCenterDelegate>
@@ -39,6 +35,11 @@
         [self.commandDelegate sendPluginResult:pluginResult callbackId:_pushDetailsCommandId];
 
     }
+}
+
+- (void)getCarouselDeeplink:(CDVInvokedUrlCommand*)command {
+    
+    self.carouselDeeplinkCommandId = command.callbackId;     
 }
 
 - (void)registerForPushWithForeground:(CDVInvokedUrlCommand*)command {
@@ -92,6 +93,29 @@
     
     NSString *jsonString = command.arguments[0];
     [self share:jsonString];
+}
+
+- (void)sendPushPayload:(CDVInvokedUrlCommand*)command {
+
+    NSString *jsonString = command.arguments[0];
+    if(jsonString != nil && ![jsonString isEqualToString:@""]) {
+
+        NSDictionary *userinfo = [self getJsonFromString: jsonString];
+        NSBundle *bundle = [NSBundle mainBundle];
+        NSString *bundleIdentifier = [bundle bundleIdentifier];
+        NSString *groupName = [NSString stringWithFormat:@"group.%@.Upshot",bundleIdentifier];
+        NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:groupName];
+        NSDictionary *payload = [defaults valueForKey:@"UpshotPush_SelectedIndex"];
+        NSInteger selectedIndex = [payload[@"index"] integerValue];
+        NSArray *deeplinks = userinfo[@"ios_deeplink"];
+        NSDictionary *deeplinkData = @{};
+        if (selectedIndex <= deeplinks.count - 1) {
+            deeplinkData = deeplinks[selectedIndex];
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[self getJsonStringFromDict:deeplinkData]];
+            [pluginResult setKeepCallbackAsBool:YES];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:_carouselDeeplinkCommandId];
+        }
+    }
 }
 
 #pragma mark Internal Methods
@@ -180,6 +204,31 @@
     UpshotShareViewController *vc = [[UpshotShareViewController alloc] init];
     vc.shareData = json;
     [[UpshotWindowManager defaultManager] showUpshotWindow:vc];
+}
+
+- (void)getDefaultAccountAndUserDetails:(CDVInvokedUrlCommand*)command {
+    
+    NSString *jsonString = command.arguments[0];
+    NSDictionary *jsonData = [self getJsonFromString:jsonString];
+    NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
+    NSString *groupName = [NSString stringWithFormat:@"group.%@.Upshot",bundleId];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:groupName];
+    [defaults setObject:[self validateString:jsonData[@"UpshotApplicationID"]] forKey:@"upshot_appId"];
+    [defaults setObject:[self validateString:jsonData[@"UpshotApplicationOwnerID"]] forKey:@"upshot_ownerId"];
+    [defaults setObject:[self validateString:jsonData[@"UpshotAppUID"]] forKey:@"upshot_appuid"];
+    [defaults setObject:[self validateString:jsonData[@"UpshotSessionID"]] forKey:@"upshot_sessionId"];
+    [defaults setObject:[self validateString:jsonData[@"UpshotUserID"]] forKey:@"upshot_userId"];
+    [defaults setObject:[self validateString:jsonData[@"UpshotVersion"]] forKey:@"upshot_sdkVersion"];
+    [defaults synchronize];
+}
+
+- (NSString *)validateString:(NSString *)value {
+    
+    if (value == nil || ![value isKindOfClass:[NSString class]]) {
+        return @"";
+    } else {
+        return value;
+    }
 }
 
 @end

@@ -4,10 +4,11 @@ var exec = require('cordova/exec');
 var UpshotPlugin = {
         
     initialize: function(params, callback) {
-
+        exec(null, null, 'UpshotPlugin', 'registerPushChannels')
         this.addListeners();
         params["upshotNewInstall"] = !this.isUserExist();
-        upshot.init( params, callback);            
+        upshot.init( params, callback);    
+        this.getDefaultAccountAndUserDetails();        
     },
 
     getDeviceToken: function(success, error) {
@@ -18,6 +19,14 @@ var UpshotPlugin = {
     getPushPayload: function(success) {
 
         exec(success,null,'UpshotPlugin','getPushPayload',[]);
+    },
+
+    getCarouselDeeplink: function(success) {
+        exec(success,null,'UpshotPlugin','getCarouselDeeplink',[]);
+    },
+
+    getNotifications: function(loadMore, responseCallback) {
+        upshot.getNotification(loadMore, responseCallback) 
     },
 
     registerForPushWithForeground: function(shouldEnable, status) {
@@ -78,6 +87,10 @@ var UpshotPlugin = {
         upshot.getActivityById(activityId);
     },
 
+    stopAd: function(divId) {
+        upshot.stopAd(divId)
+    },
+
     getBadges: function() {
        return upshot.getBadges();
     },
@@ -109,7 +122,6 @@ var UpshotPlugin = {
     sendDeviceToken: function(deviceToken, devicePlatform) {
         
         if(devicePlatform.toLowerCase() == 'ios') {
-
             upshot.updateUserProfile({'apnsToken': {"token": deviceToken}});
         }  else if(devicePlatform.toLowerCase() == 'android') {
             
@@ -118,7 +130,7 @@ var UpshotPlugin = {
     },
 
     pushClickEvent: function(payload) {
-
+        exec(null, null, 'UpshotPlugin', 'sendPushPayload', [payload]);        
         upshot.pushClickEvent(JSON.parse(payload));
     },    
 
@@ -148,6 +160,31 @@ var UpshotPlugin = {
             return true
         } else {
             return false
+        }        
+    },
+
+    getDefaultAccountAndUserDetails: function() {
+
+        var upshotData = window.localStorage.getItem("upshotData");
+        var upshotVersion = window.localStorage.getItem("upshotVersion");
+        if (upshotData != undefined) {
+            var upshotJsonData = JSON.parse(upshotData);
+            var initParams = upshotJsonData["upshotInitParams"];
+            if (initParams != undefined) {
+                var initJsonParams = JSON.parse(initParams);
+                var appId = initJsonParams["UpshotApplicationID"] ? initJsonParams["UpshotApplicationID"] : "";
+                var ownerId = initJsonParams["UpshotApplicationOwnerID"] ? initJsonParams["UpshotApplicationOwnerID"] : "";
+                var userId = upshotJsonData["upshotUserID"] ? upshotJsonData["upshotUserID"] : "";
+                var appuid = upshotJsonData["upshotAppUID"] ? upshotJsonData["upshotAppUID"] : "";
+                var sessionId = upshotJsonData["upshotSessionID"] ? upshotJsonData["upshotSessionID"] : "";
+                var baseUrl = upshotJsonData["upshotAPIURL"] ? upshotJsonData["upshotAPIURL"] : ""
+                var sdkVersion = "1.6.3"
+                if(upshotVersion != undefined) {
+                    sdkVersion = upshotVersion;
+                }
+                var details = {"UpshotApplicationID": appId, "UpshotApplicationOwnerID": ownerId, "UpshotUserID": userId, "UpshotAppUID": appuid, "UpshotSessionID": sessionId, "UpshotBaseUrl":baseUrl, "UpshotVersion": sdkVersion};
+                exec(null, null, 'UpshotPlugin', 'getDefaultAccountAndUserDetails', [JSON.stringify(details)]);       
+            }
         }        
     }
 }
