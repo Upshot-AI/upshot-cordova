@@ -16,47 +16,30 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "UpshotCordovaPlugin"
-  spec.version      = "1.1.2"
+  spec.version      = "1.1.1"
   spec.summary      = "UpshotCordovaPlugin used for enhance push notifications."
-  spec.description  = "UpshotCordovaPlugin used for enhance push notifications."
-  spec.homepage     = "https://github.com/Upshot-AI/upshot-cordova.git"    
+  spec.description  = "Upshot.ai is a analytics and customer engagement platform. This framework helps you capture analytics, track events, send smart notifications and in-app messages to users."
+  spec.homepage     = "http://www.upshot.ai/"    
+  spec.documentation_url = 'http://www.upshot.ai/documentation/sdk/Cordova/'
+  spec.social_media_url   = 'https://twitter.com/upshot_ai'
+
+  spec.platform     = :ios
+  spec.ios.deployment_target  = "9.0"
   spec.license      = { :type => "MIT", :file => "LICENSE" }
-  spec.author             = { "Upshot.ai" => "developer@upshot.ai" }
-  spec.platform     = :ios  
-  spec.ios.deployment_target  = "10.0"
+  spec.author        = { "Upshot" => "developer@upshot.ai" }
+  
   spec.source       = { 
     :git => 'https://github.com/Upshot-AI/upshot-cordova.git',
     :tag =>  'v'+spec.version.to_s
   }
-  spec.requires_arc = true
+  
   spec.ios.vendored_frameworks = 'Framework/UpshotCordovaPlugin.xcframework'
-  # spec.ios.preserve_paths = 'Framework/UpshotCordovaPlugin.xcframework'
+  spec.ios.preserve_paths = 'Framework/UpshotCordovaPlugin.xcframework'
+  spec.requires_arc = true
   spec.pod_target_xcconfig = {
     'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64'
   }
   spec.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
-  # spec.source_files  = "iOS/*.{h,m}"
-  # spec.vendored_frameworks = 'UpshotCordovaPlugin.framework'
-  # spec.exclude_files = "Classes/Exclude"
-  # spec.public_header_files = "Classes/**/*.h"
-  # spec.resource  = "icon.png"
-  # spec.resources = "Resources/*.png"
-  # spec.framework  = "UpshotCordovaPlugin"
-  # spec.frameworks = "SomeFramework", "AnotherFramework"
-
-  # spec.library   = "iconv"
-  # spec.libraries = "iconv", "xml2"
-
-
-  # ――― Project Settings ――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
-  #
-  #  If your library depends on compiler flags you can set them in the xcconfig hash
-  #  where they will only apply to your library. If you depend on other Podspecs
-  #  you can include multiple dependencies to ensure it works.
-
-  # spec.requires_arc = true
-
-  # spec.xcconfig = { "HEADER_SEARCH_PATHS" => "$(SDKROOT)/usr/include/libxml2" }
-  # spec.dependency "JSONKit", "~> 1.4"
+  
 
 end
