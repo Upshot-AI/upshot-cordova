@@ -166,9 +166,31 @@ var UpshotPlugin = {
     getDefaultAccountAndUserDetails: function() {
 
         var upshotData = window.localStorage.getItem("upshotData");
-        var upshotVersion = window.localStorage.getItem("upshotVersion");
+        var upshotVersion = window.localStorage.getItem("upshotVersion");        
+        
+        var sdkVersion = "1.6.3"
+        if(upshotVersion != undefined) {
+            sdkVersion = upshotVersion;
+        }
+        
         if (upshotData != undefined) {
+
+            var currentLocaleCode = "en_US";
             var upshotJsonData = JSON.parse(upshotData);
+            var currentAppuid = upshotJsonData["upshotAppUID"];
+            var localeCodeStr = upshotJsonData["upshotLocaleCode"];
+            console.log("localeCodeStr" + localeCodeStr)
+            if (localeCodeStr != undefined && localeCodeStr != '') {
+                var localeObj = JSON.parse(localeCodeStr)
+                if (currentAppuid == undefined || currentAppuid == '') {
+                    currentAppuid = 'noAppuid293018'
+                }            
+                var localeCode = localeObj[currentAppuid]
+                if(localeCode != undefined && localeCode != '') {
+                    currentLocaleCode = localeCode
+                }
+            }
+
             var initParams = upshotJsonData["upshotInitParams"];
             if (initParams != undefined) {
                 var initJsonParams = JSON.parse(initParams);
@@ -178,11 +200,10 @@ var UpshotPlugin = {
                 var appuid = upshotJsonData["upshotAppUID"] ? upshotJsonData["upshotAppUID"] : "";
                 var sessionId = upshotJsonData["upshotSessionID"] ? upshotJsonData["upshotSessionID"] : "";
                 var baseUrl = upshotJsonData["upshotAPIURL"] ? upshotJsonData["upshotAPIURL"] : ""
-                var sdkVersion = "1.6.3"
-                if(upshotVersion != undefined) {
-                    sdkVersion = upshotVersion;
+                if (!baseUrl.includes("https")){
+                    baseUrl = "https://"+baseUrl;
                 }
-                var details = {"UpshotApplicationID": appId, "UpshotApplicationOwnerID": ownerId, "UpshotUserID": userId, "UpshotAppUID": appuid, "UpshotSessionID": sessionId, "UpshotBaseUrl":baseUrl, "UpshotVersion": sdkVersion};
+                var details = {"UpshotApplicationID": appId, "UpshotApplicationOwnerID": ownerId, "UpshotUserID": userId, "UpshotAppUID": appuid, "UpshotSessionID": sessionId, "UpshotBaseUrl":baseUrl, "UpshotVersion": sdkVersion, "upshotLocaleCode": currentLocaleCode};
                 exec(null, null, 'UpshotPlugin', 'getDefaultAccountAndUserDetails', [JSON.stringify(details)]);       
             }
         }        

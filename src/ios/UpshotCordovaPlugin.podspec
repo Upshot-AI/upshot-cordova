@@ -33,8 +33,8 @@ Pod::Spec.new do |spec|
     :tag =>  'v'+spec.version.to_s
   }
   
-  spec.ios.vendored_frameworks = 'Framework/UpshotCordovaPlugin.xcframework'
-  spec.ios.preserve_paths = 'Framework/UpshotCordovaPlugin.xcframework'
+  spec.ios.vendored_frameworks = 'src/ios/Framework/UpshotCordovaPlugin.xcframework'
+  # spec.ios.preserve_paths = 'Framework/UpshotCordovaPlugin.xcframework'
   spec.requires_arc = true
   spec.pod_target_xcconfig = {
     'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64'

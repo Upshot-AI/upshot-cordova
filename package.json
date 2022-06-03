@@ -1,6 +1,6 @@
 {
   "name": "cordova_plugin_upshotplugin",
-  "version": "1.1.2",
+  "version": "1.1.1",
   "description": "This plugin  will enable you to track events, send notifications, In-apps messages to your users",
   "cordova": {
     "id": "cordova_plugin_upshotplugin",

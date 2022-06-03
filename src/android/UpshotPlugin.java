@@ -35,6 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.os.StrictMode;
+import java.util.Iterator;
 
 /**
  * This class echoes a string called from JavaScript.
@@ -81,7 +82,7 @@ public class UpshotPlugin extends CordovaPlugin {
     }
 
     if (action.equals("getDefaultAccountAndUserDetails")) {
-      this.getAccountDetails(args.getString(0))
+      this.getAccountDetails(args.getString(0));
     }
     return false;
   }
@@ -91,10 +92,24 @@ public class UpshotPlugin extends CordovaPlugin {
   private void getAccountDetails(String data) {
     try {
       JSONObject accountDetails = new JSONObject(data);
-      
+      Bundle jsonBundle = jsonToBundle(accountDetails);
+      jsonBundle.putString("UpshotPlatform","Hybrid_Android");
+      Context context = this.cordova.getActivity().getApplicationContext();
+      BrandKinesis.initialiseBrandKinesis(context, jsonBundle);
     } catch (JSONException e) {
       e.printStackTrace();
     }
+  }
+
+  private static Bundle jsonToBundle(JSONObject jsonObject) throws JSONException {
+    Bundle bundle = new Bundle();
+    Iterator iter = jsonObject.keys();
+    while(iter.hasNext()){
+      String key = (String)iter.next();
+      String value = jsonObject.getString(key);
+      bundle.putString(key,value);
+    }
+    return bundle;
   }
 
   private void getDeviceToken(CallbackContext callbackContext) {
