@@ -1,5 +1,6 @@
 package cordova_plugin_upshotplugin;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -35,6 +36,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.os.StrictMode;
+
+import androidx.core.app.ActivityCompat;
+
 import java.util.Iterator;
 
 /**
@@ -64,16 +68,17 @@ public class UpshotPlugin extends CordovaPlugin {
       return true;
     }
 
+    if (action.equals("registerForPushNotifications")) {
+      this.registerChannels();
+      this.requestForNotificationPermissions();
+    }
+
     if (action.equals("redirectionCallback")) {
       this.redirectionCallback(args.getString(0));
     }
 
     if (action.equals("shareCallback")) {
       this.shareCallback(args.getString(0));
-    }
-
-    if (action.equals("registerPushChannels")) {
-      this.registerChannels();
     }
 
     if (action.equals("getCarouselDeeplink")) {
@@ -84,16 +89,33 @@ public class UpshotPlugin extends CordovaPlugin {
     if (action.equals("getDefaultAccountAndUserDetails")) {
       this.getAccountDetails(args.getString(0));
     }
+
+    if (action.equals("ratingStoreRedirectionCallback")) {
+      this.ratingStoreRedirection(args.getString(0));
+    }
+
     return false;
   }
 
-  //Plugin Methods
+  // Plugin Methods
+
+  private void requestForNotificationPermissions() {
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      if (ActivityCompat.checkSelfPermission(this.cordova.getActivity().getApplicationContext(),
+          Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+
+        this.cordova.getActivity()
+            .requestPermissions(new String[] { Manifest.permission.POST_NOTIFICATIONS }, 1);
+      }
+    }
+  }
 
   private void getAccountDetails(String data) {
     try {
       JSONObject accountDetails = new JSONObject(data);
       Bundle jsonBundle = jsonToBundle(accountDetails);
-      jsonBundle.putString("UpshotPlatform","Hybrid_Android");
+      jsonBundle.putString("UpshotPlatform", "Hybrid_Android");
       Context context = this.cordova.getActivity().getApplicationContext();
       BrandKinesis.initialiseBrandKinesis(context, jsonBundle);
     } catch (JSONException e) {
@@ -104,10 +126,10 @@ public class UpshotPlugin extends CordovaPlugin {
   private static Bundle jsonToBundle(JSONObject jsonObject) throws JSONException {
     Bundle bundle = new Bundle();
     Iterator iter = jsonObject.keys();
-    while(iter.hasNext()){
-      String key = (String)iter.next();
+    while (iter.hasNext()) {
+      String key = (String) iter.next();
       String value = jsonObject.getString(key);
-      bundle.putString(key,value);
+      bundle.putString(key, value);
     }
     return bundle;
   }
@@ -169,55 +191,88 @@ public class UpshotPlugin extends CordovaPlugin {
     }
   }
 
+  private void ratingStoreRedirection(String redirectionData) {
+    try {
+      JSONObject data = new JSONObject(redirectionData);
+      int type = data.getInt("ratingType");
+      String url = data.getString("url");
+      if (type == 0) {
+        Context context = this.cordova.getActivity().getApplicationContext();
+        UpshotReviewManager reviewManager = new UpshotReviewManager(context);
+        reviewManager.showRateApp(this.cordova.getActivity());
+      } else {
+
+        Context context = this.cordova.getActivity().getApplicationContext();
+        final String storePrefix = "https://play.google.com/store/apps/details?id=";
+        if (url.contains(storePrefix)) {
+          String appPackageName = url.substring(storePrefix.length());
+
+          try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+          } catch (android.content.ActivityNotFoundException anfe) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+          }
+        }
+      }
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+  }
+
   // Utility Methods
 
   @TargetApi(Build.VERSION_CODES.O)
-    private void createNotificationChannels() {
-        String notificationsChannelId = "notifications";
-        Context context = this.cordova.getActivity().getApplicationContext();
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+  private void createNotificationChannels() {
+    String notificationsChannelId = "notifications";
+    Context context = this.cordova.getActivity().getApplicationContext();
+    NotificationManager notificationManager = (NotificationManager) context
+        .getSystemService(Context.NOTIFICATION_SERVICE);
 
-        List<NotificationChannel> channels = notificationManager.getNotificationChannels();
-        NotificationChannel existingChanel = null;
-        int count = 0;
-        for (NotificationChannel channel : channels) {
-            String fullId = channel.getId();
-            if (fullId.contains(notificationsChannelId)) {
-                existingChanel = channel;
-                String[] numbers = extractRegexMatches(fullId, "\\d+");
-                if (numbers.length > 0) {
-                    count = Integer.valueOf(numbers[0]);
-                }
-                break;
-            }
+    List<NotificationChannel> channels = notificationManager.getNotificationChannels();
+    NotificationChannel existingChanel = null;
+    int count = 0;
+    for (NotificationChannel channel : channels) {
+      String fullId = channel.getId();
+      if (fullId.contains(notificationsChannelId)) {
+        existingChanel = channel;
+        String[] numbers = extractRegexMatches(fullId, "\\d+");
+        if (numbers.length > 0) {
+          count = Integer.valueOf(numbers[0]);
         }
-        if (existingChanel != null) {
-            if (existingChanel.getImportance() < NotificationManager.IMPORTANCE_DEFAULT) {
-                notificationManager.deleteNotificationChannel(existingChanel.getId());
-            }
-        }
-
-        String newId = existingChanel == null ? notificationsChannelId + '_' + (count + 1) : existingChanel.getId();
-        NotificationChannel channel = new NotificationChannel(
-                newId, notificationsChannelId, NotificationManager.IMPORTANCE_HIGH);
-        channel.setLightColor(Color.GREEN);
-        channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
-        notificationManager.createNotificationChannel(channel);
+        break;
+      }
+    }
+    if (existingChanel != null) {
+      if (existingChanel.getImportance() < NotificationManager.IMPORTANCE_DEFAULT) {
+        notificationManager.deleteNotificationChannel(existingChanel.getId());
+      }
     }
 
-    public String[] extractRegexMatches(String source, String regex) {
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(source);
+    String newId = existingChanel == null ? notificationsChannelId + '_' + (count + 1) : existingChanel.getId();
+    NotificationChannel channel = new NotificationChannel(
+        newId, notificationsChannelId, NotificationManager.IMPORTANCE_HIGH);
+    channel.setLightColor(Color.GREEN);
+    channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+    notificationManager.createNotificationChannel(channel);
+  }
 
-        ArrayList<String> matches = new ArrayList<>();
-        while (matcher.find()) {
-            matches.add(matcher.group());
-        }
+  public String[] extractRegexMatches(String source, String regex) {
+    Pattern pattern = Pattern.compile(regex);
+    Matcher matcher = pattern.matcher(source);
 
-        String[] result = new String[matches.size()];
-        matches.toArray(result);
-        return result;
+    ArrayList<String> matches = new ArrayList<>();
+    while (matcher.find()) {
+      matches.add(matcher.group());
     }
+
+    String[] result = new String[matches.size()];
+    matches.toArray(result);
+    return result;
+  }
 
   public static void sendToken(String token) {
 
@@ -381,7 +436,8 @@ public class UpshotPlugin extends CordovaPlugin {
       contactNumber = contactNumber.trim();
       try {
         contactNumber = contactNumber.replaceAll("\\s", "");
-      } catch (Exception e) {}
+      } catch (Exception e) {
+      }
     }
 
     String telPrefix = "tel://";
@@ -418,7 +474,8 @@ public class UpshotPlugin extends CordovaPlugin {
     if (TextUtils.isEmpty(actionValue)) {
       return;
     }
-    if (SystemClock.elapsedRealtime() - lastClickTime < 500) return;
+    if (SystemClock.elapsedRealtime() - lastClickTime < 500)
+      return;
     lastClickTime = SystemClock.elapsedRealtime();
 
     actionValue = actionValue.trim();

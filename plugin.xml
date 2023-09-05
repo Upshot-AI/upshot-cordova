@@ -26,8 +26,8 @@
         <source-file src="src/android/UpshotWebRedirection.java" target-dir="src/cordova_plugin_upshotplugin" />        
         <source-file src="src/android/upshot_web_redirection.xml" target-dir="res/layout" />
         <framework src="src/android/upshot_cordova.gradle" custom="true" type="gradleReference" />        
-        <lib-file src="src/android/UpshotPush.aar"/>
-        <!-- <framework src='com.github.upshot-git:upshotpushlib:upshot-push-release1.0'/> -->
+        <!-- <lib-file src="src/android/UpshotPush.aar"/> -->
+        <!-- <framework src='com.github.Upshot-AI:upshotpushlib:legacyV4.0'/> -->
         <framework src="com.google.firebase:firebase-messaging:17.5.0" />
         <framework src="android.arch.work:work-runtime:1.0.0"/>     
         <framework src="com.github.bumptech.glide:glide:4.9.0"/> 

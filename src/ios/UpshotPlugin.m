@@ -5,6 +5,7 @@
 #import "UpshotPlugin.h"
 @import UpshotCordovaPlugin;
 @import UserNotifications;
+@import StoreKit;
 
 @interface UpshotPlugin () <UNUserNotificationCenterDelegate>
 
@@ -42,36 +43,29 @@
     self.carouselDeeplinkCommandId = command.callbackId;     
 }
 
-- (void)registerForPushWithForeground:(CDVInvokedUrlCommand*)command {
-    
-    if (command.arguments.count == 1) {
-        self.allowForegroundPush = command.arguments[0];
-    }
+- (void)registerForPushNotifications:(CDVInvokedUrlCommand*)command {
+       
     if ([[[UIDevice currentDevice] systemVersion]floatValue] >= 10.0 ) {
+        
+        id delegate = [UIApplication sharedApplication].delegate;
         
         UNUserNotificationCenter *notificationCenter = [UNUserNotificationCenter currentNotificationCenter];
         [notificationCenter requestAuthorizationWithOptions:(UNAuthorizationOptionAlert | UNAuthorizationOptionBadge | UNAuthorizationOptionSound ) completionHandler:^(BOOL granted, NSError * _Nullable error) {
 
+            if (granted) {
+                if(delegate != nil) {
+                    [notificationCenter setDelegate:delegate];
+                }
+            }
             NSDictionary *status = @{@"status": [NSNumber numberWithBool:granted]};
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[self getJsonStringFromDict:status]];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-            if (granted) {
-                [notificationCenter setDelegate:self];
-            }
-        }];        
-    } else {
-        
-        UIUserNotificationType types = (UIUserNotificationTypeAlert|
-                                        UIUserNotificationTypeSound|
-                                        UIUserNotificationTypeBadge);        
-        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:types categories:nil];
-        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
-        [[UIApplication sharedApplication] registerForRemoteNotifications];
-    }
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [[UIApplication sharedApplication] registerForRemoteNotifications];    
-    });    
+            
+        }];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[UIApplication sharedApplication] registerForRemoteNotifications];
+        });
+    }        
 }
 
 - (void)redirectionCallback:(CDVInvokedUrlCommand*)command {
@@ -96,6 +90,31 @@
     
     NSString *jsonString = command.arguments[0];
     [self share:jsonString];
+}
+
+- (void)ratingStoreRedirectionCallback:(CDVInvokedUrlCommand *)command {
+        
+    NSString *jsonString = command.arguments[0];
+    NSData *data = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    
+    if(json != nil) {
+        
+        NSInteger type = [json[@"ratingType"] integerValue];
+        NSString *url = json[@"url"];
+        
+        if (type == 1) {
+            if (@available(iOS 10.3,*)) {
+                [SKStoreReviewController requestReview];
+            } else {
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [self customRedirection:url];
+                });
+            }
+        } else {
+            [self customRedirection:url];
+        }
+    }
 }
 
 - (void)sendPushPayload:(CDVInvokedUrlCommand*)command {

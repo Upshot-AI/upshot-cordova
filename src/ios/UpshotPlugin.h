@@ -18,7 +18,6 @@
 @property (nonatomic, strong) NSString *carouselDeeplinkCommandId;
 @property (nonatomic, strong) NSDictionary *pushDetails;
 @property (nonatomic, strong) NSString *resgiterCommandId;
-@property (nonatomic, assign) BOOL allowForegroundPush;
 
 //Internal Methods
 - (void)didRegisterForRemoteNotificationWithDeviceToken:(NSString *)token;
@@ -28,7 +27,7 @@
 // Plugin Methods
 - (void)getDeviceToken:(CDVInvokedUrlCommand*)command;
 - (void)getPushPayload:(CDVInvokedUrlCommand*)command;
-- (void)registerForPushWithForeground:(CDVInvokedUrlCommand*)command;
+- (void)registerForPushNotifications:(CDVInvokedUrlCommand*)command;
 
 
 @end

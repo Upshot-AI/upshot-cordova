@@ -35,6 +35,12 @@
     completionHandler(UNAuthorizationOptionAlert | UNAuthorizationOptionBadge | UNAuthorizationOptionSound);
 }
 
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)(void))completionHandler {
+    
+    UpshotPlugin *plugin = [self getCommandInstance:@"UpshotPlugin"];
+    [plugin didReceiveRemoteNotification:response.notification.request.content.userInfo];
+}
+
 - (NSString *)getTokenFromdata:(NSData *)data {
 
   NSUInteger dataLength = data.length;
