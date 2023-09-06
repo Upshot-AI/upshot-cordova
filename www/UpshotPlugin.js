@@ -22,7 +22,7 @@ var UpshotPlugin = {
      */
     getDeviceToken: function (success, error) {
 
-        exec(success, error, 'UpshotPlugin', 'getDeviceToken', []);
+        cordova.exec(success, error, 'UpshotPlugin', 'getDeviceToken', []);
     },
 
     /**
@@ -32,7 +32,7 @@ var UpshotPlugin = {
      */
     getPushPayload: function (success) {
 
-        exec(success, null, 'UpshotPlugin', 'getPushPayload', []);
+        cordova.exec(success, null, 'UpshotPlugin', 'getPushPayload', []);
     },
 
     /**
@@ -40,7 +40,7 @@ var UpshotPlugin = {
      * @param {*} success 
      */
     getCarouselDeeplink: function (success) {
-        exec(success, null, 'UpshotPlugin', 'getCarouselDeeplink', []);
+        cordova.exec(success, null, 'UpshotPlugin', 'getCarouselDeeplink', []);
     },
 
     /**
@@ -83,7 +83,7 @@ var UpshotPlugin = {
      */
     registerForPushNotifications: function () {
 
-        exec(status, null, 'UpshotPlugin', 'registerForPushNotifications', []);
+        cordova.exec(null, null, 'UpshotPlugin', 'registerForPushNotifications', []);
     },
 
     /**
@@ -282,7 +282,7 @@ var UpshotPlugin = {
      * @param {*} callback 
      */
     pushClickEvent: function (payload) {
-        exec(null, null, 'UpshotPlugin', 'sendPushPayload', [payload]);
+        cordova.exec(null, null, 'UpshotPlugin', 'sendPushPayload', [payload]);
         upshot.pushClickEvent(JSON.parse(payload));
     },
 
@@ -308,14 +308,14 @@ var UpshotPlugin = {
 
     addListeners: function () {
         window.addEventListener('UpshotActivityShared', function (data) {
-            exec(null, null, 'UpshotPlugin', 'shareCallback', [JSON.stringify(data.detail)]);
+            cordova.exec(null, null, 'UpshotPlugin', 'shareCallback', [JSON.stringify(data.detail)]);
         }, false);
         window.addEventListener('UpshotActivityRedirectionCallback', function (data) {
-            exec(null, null, 'UpshotPlugin', 'redirectionCallback', [JSON.stringify(data.detail)]);
+            cordova.exec(null, null, 'UpshotPlugin', 'redirectionCallback', [JSON.stringify(data.detail)]);
         }, false);
         window.addEventListener('UpshotActivityRatingCallback', function (data) {
             console.log("UpshotActivityRatingCallback--------------- "[JSON.stringify(data.detail)])
-            exec(null, null, 'UpshotPlugin', 'ratingStoreRedirectionCallback', [JSON.stringify(data.detail)]);
+            cordova.exec(null, null, 'UpshotPlugin', 'ratingStoreRedirectionCallback', [JSON.stringify(data.detail)]);
         }, false);
     },
 
@@ -378,7 +378,7 @@ var UpshotPlugin = {
                     baseUrl = "https://" + baseUrl;
                 }
                 var details = { "UpshotApplicationID": appId, "UpshotApplicationOwnerID": ownerId, "UpshotUserID": userId, "UpshotAppUID": appuid, "UpshotSessionID": sessionId, "UpshotBaseUrl": baseUrl, "UpshotVersion": sdkVersion, "upshotLocaleCode": currentLocaleCode };
-                exec(null, null, 'UpshotPlugin', 'getDefaultAccountAndUserDetails', [JSON.stringify(details)]);
+                cordova.exec(null, null, 'UpshotPlugin', 'getDefaultAccountAndUserDetails', [JSON.stringify(details)]);
             }
         }
     }
