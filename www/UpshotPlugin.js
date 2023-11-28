@@ -11,9 +11,15 @@ var UpshotPlugin = {
     initialize: function (params, callback) {
         this.addListeners();
         params["upshotNewInstall"] = !this.isUserExist();
-        upshot.init(params, callback);
+
         this.getDeviceDetails((response) => {
-            console.log("response------", response);
+
+            var deviceDetails = JSON.parse(response);
+            params["deviceName"] = deviceDetails["deviceName"]
+            params["osVersion"] = deviceDetails["osVersion"]
+            params["manufacturer"] = deviceDetails["manufacturer"]
+            console.log("init Params ------", params);
+            upshot.init(params, callback);
         })
         this.getDefaultAccountAndUserDetails();
     },
