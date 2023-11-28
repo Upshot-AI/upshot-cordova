@@ -94,10 +94,34 @@ public class UpshotPlugin extends CordovaPlugin {
       this.ratingStoreRedirection(args.getString(0));
     }
 
+    if (action.equals("getDeviceDetails")) {
+      this.getDeviceInfoDetails(callbackContext);
+    }
+
     return false;
   }
 
   // Plugin Methods
+
+  private void getDeviceInfoDetails(CallbackContext callbackContext) {
+
+    String osVersion = "" + android.os.Build.VERSION.SDK_INT;
+    String deviceModel = "" + android.os.Build.MODEL;
+    String manufacturer = "" + android.os.Build.MANUFACTURER;
+
+    JSONObject deviceDetails = new JSONObject();
+    try {
+      deviceDetails.put("deviceName", deviceModel);
+      deviceDetails.put("osVersion", osVersion);
+      deviceDetails.put("manufacturer", manufacturer);
+
+      PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, deviceDetails.toString());
+      pluginResult.setKeepCallback(true);
+      callbackContext.sendPluginResult(pluginResult);
+    } catch (JSONException e) {
+
+    }
+  }
 
   private void requestForNotificationPermissions() {
 
@@ -158,7 +182,7 @@ public class UpshotPlugin extends CordovaPlugin {
         redirectionToWeb(deeplink);
       } else if (type == 5) {
         redirectToCustomUri(deeplink);
-      } else if (type == 4) {
+      } else if (type == 4 || type == 2) {
         redirectToCall(deeplink);
       }
     } catch (JSONException e) {

@@ -12,7 +12,14 @@ var UpshotPlugin = {
         this.addListeners();
         params["upshotNewInstall"] = !this.isUserExist();
         upshot.init(params, callback);
+        this.getDeviceDetails((response) => {
+            console.log("response------", response);
+        })
         this.getDefaultAccountAndUserDetails();
+    },
+
+    getDeviceDetails: function (response) {
+        cordova.exec(response, null, 'UpshotPlugin', 'getDeviceDetails', []);
     },
 
     /**

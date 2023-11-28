@@ -77,7 +77,7 @@
     }
     NSInteger type = [jsonData[@"type"] integerValue];
     NSString *deeplink = jsonData[@"deeplink"];
-    if (type == 5 || type == 4) {
+    if (type == 5 || type == 4 || type == 2) {
         [self customRedirection:deeplink];
     } else if(type == 3) {
         [self webRedirection:deeplink];
@@ -180,13 +180,13 @@
     }
 }
 
-- (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
+// - (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
     
-    if (self.allowForegroundPush) {
+//     if (self.allowForegroundPush) {
 
-        completionHandler(UNAuthorizationOptionAlert | UNAuthorizationOptionBadge | UNAuthorizationOptionSound);
-    }
-}
+//         completionHandler(UNAuthorizationOptionAlert | UNAuthorizationOptionBadge | UNAuthorizationOptionSound);
+//     }
+// }
 
 - (NSString *)getJsonStringFromDict:(NSDictionary *)dict {
     
@@ -278,5 +278,22 @@
         return value;
     }
 }
+
+- (NSString *)deviceName {
+    
+    struct utsname systemInfo;
+    uname(&systemInfo);
+    
+    return [NSString stringWithCString:systemInfo.machine
+                              encoding:NSUTF8StringEncoding];
+}
+
+- (NSString *)getOSVersion {
+    
+    UIDevice *currentDevice = [UIDevice currentDevice];
+    NSString *osVersion = [currentDevice systemVersion];
+    return osVersion;
+}
+
 
 @end
