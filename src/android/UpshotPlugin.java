@@ -112,8 +112,8 @@ public class UpshotPlugin extends CordovaPlugin {
     JSONObject deviceDetails = new JSONObject();
     try {
       deviceDetails.put("deviceName", deviceModel);
-      deviceDetails.put("osVersion", osVersion);
-      deviceDetails.put("manufacturer", manufacturer);
+      deviceDetails.put("version", osVersion);
+      deviceDetails.put("manufacture", manufacturer);
 
       PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, deviceDetails.toString());
       pluginResult.setKeepCallback(true);

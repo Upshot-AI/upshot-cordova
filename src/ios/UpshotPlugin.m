@@ -3,6 +3,8 @@
 #import <Cordova/CDV.h>
 #import <Cordova/CDVPlugin.h>
 #import "UpshotPlugin.h"
+#import <sys/utsname.h>
+
 @import UpshotCordovaPlugin;
 @import UserNotifications;
 @import StoreKit;
@@ -41,6 +43,20 @@
 - (void)getCarouselDeeplink:(CDVInvokedUrlCommand*)command {
     
     self.carouselDeeplinkCommandId = command.callbackId;     
+}
+
+- (void)getDeviceDetails:(CDVInvokedUrlCommand*)command {
+    
+    NSString *deviceName = [self deviceName];
+    NSString *osVersion = [self getOSVersion];
+    NSString *manufacturer = @"Apple";
+    
+    NSDictionary *deviceDetails = @{@"deviceName": deviceName, @"version": osVersion, @"manufacture":manufacturer};
+    NSString *message = [self getJsonStringFromDict:deviceDetails];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:message];
+    [pluginResult setKeepCallbackAsBool:YES];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    
 }
 
 - (void)registerForPushNotifications:(CDVInvokedUrlCommand*)command {
@@ -283,7 +299,6 @@
     
     struct utsname systemInfo;
     uname(&systemInfo);
-    
     return [NSString stringWithCString:systemInfo.machine
                               encoding:NSUTF8StringEncoding];
 }

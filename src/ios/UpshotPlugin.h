@@ -23,8 +23,6 @@
 - (void)didRegisterForRemoteNotificationWithDeviceToken:(NSString *)token;
 - (void)didFailToRegisterForRemoteNotificationWithError;
 - (void)didReceiveRemoteNotification:(NSDictionary *)pushDetails;
-- (NSString *)deviceName;
-- (NSString *)getOSVersion
 
 // Plugin Methods
 - (void)getDeviceToken:(CDVInvokedUrlCommand*)command;

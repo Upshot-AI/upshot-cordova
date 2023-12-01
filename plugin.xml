@@ -6,18 +6,7 @@
             <feature name="UpshotPlugin"><param name="android-package" value="cordova_plugin_upshotplugin.UpshotPlugin" /></feature>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml" />
-        <config-file parent="/manifest/application" target="AndroidManifest.xml" > 
-         <service android:name="com.upshot.push.lib.BKFirebaseMessagingService">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>        
-            <receiver android:name="cordova_plugin_upshotplugin.UpshotPushAction">
-                <intent-filter>
-                    <action android:name="cordova_plugin_upshotplugin.UpshotPushAction" />
-                </intent-filter>
-            </receiver>
-            <meta-data android:name="BkPushActionReceiver" android:value="cordova_plugin_upshotplugin.UpshotPushAction" />            
+        <config-file parent="/manifest/application" target="AndroidManifest.xml" >                         
             <activity android:name="cordova_plugin_upshotplugin.UpshotWebRedirection" android:theme="@android:style/Theme.NoTitleBar" />            
         </config-file>
 
@@ -26,9 +15,7 @@
         <source-file src="src/android/UpshotReviewManager.java" target-dir="src/cordova_plugin_upshotplugin" />                
         <source-file src="src/android/UpshotWebRedirection.java" target-dir="src/cordova_plugin_upshotplugin" />        
         <source-file src="src/android/upshot_web_redirection.xml" target-dir="res/layout" />
-        <framework src="src/android/upshot_cordova.gradle" custom="true" type="gradleReference" />                        
-        <framework src="android.arch.work:work-runtime:1.0.0"/>     
-        <framework src="com.github.bumptech.glide:glide:4.9.0"/> 
+        <framework src="src/android/upshot_cordova.gradle" custom="true" type="gradleReference" />                                            
     </platform>
 
     <platform name="ios">
