@@ -98,6 +98,17 @@ public class UpshotPlugin extends CordovaPlugin {
       this.getDeviceInfoDetails(callbackContext);
     }
 
+    if (action.equals("displayNotification")) {
+
+      String pushPayload = args.getString(0);
+      Log.d("PushPayload", pushPayload);
+      JSONObject accountDetails = new JSONObject(pushPayload);
+      Bundle jsonBundle = jsonToBundle(accountDetails);
+      Context context = this.cordova.getActivity().getApplicationContext();
+
+      BrandKinesis.getBKInstance().buildEnhancedPushNotification(context, jsonBundle, true);
+    }
+
     return false;
   }
 
@@ -436,7 +447,7 @@ public class UpshotPlugin extends CordovaPlugin {
       Intent redirectionIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(actionValue));
       redirectionIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
       redirectionIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
-      if (redirectionIntent.resolveActivity(context.getPackageManager()) != null) {
+      if (context != null) {
         context.startActivity(redirectionIntent);
       }
     } catch (ActivityNotFoundException exp) {

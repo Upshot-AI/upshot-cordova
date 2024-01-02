@@ -312,6 +312,10 @@ var UpshotPlugin = {
         upshot.getStreak(responseCallback);
     },
 
+    displayNotification: function (payload) {
+        cordova.exec(null, null, 'UpshotPlugin', 'displayNotification', [payload]);
+    },
+
 
     addListeners: function () {
         window.addEventListener('UpshotActivityShared', function (data) {
