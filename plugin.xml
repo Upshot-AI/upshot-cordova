@@ -15,6 +15,7 @@
         <source-file src="src/android/UpshotReviewManager.java" target-dir="src/cordova_plugin_upshotplugin" />                
         <source-file src="src/android/UpshotWebRedirection.java" target-dir="src/cordova_plugin_upshotplugin" />        
         <source-file src="src/android/upshot_web_redirection.xml" target-dir="res/layout" />
+        <source-file src="src/android/upshot_file_path.xml" target-dir="res/xml" />
         <framework src="src/android/upshot_cordova.gradle" custom="true" type="gradleReference" />                                            
     </platform>
 

@@ -38,6 +38,7 @@ import org.json.JSONObject;
 import android.os.StrictMode;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 
 import java.util.Iterator;
 
@@ -393,6 +394,7 @@ public class UpshotPlugin extends CordovaPlugin {
   }
 
   private void redirectionToShare(String textToShare, String encodedImage) {
+
     Context context = this.cordova.getActivity().getApplicationContext();
     Intent sendIntent = new Intent();
 
@@ -406,20 +408,25 @@ public class UpshotPlugin extends CordovaPlugin {
       sendIntent.putExtra(Intent.EXTRA_TEXT, textToShare);
       sendIntent.setType("text/plain");
     }
-    sendIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
-    sendIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
     sendIntent.setAction(Intent.ACTION_SEND);
-    context.startActivity(sendIntent);
+
+    Intent intentChooser = Intent.createChooser(sendIntent, "Share Image");
+
+    intentChooser.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK
+        | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION
+        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+    intentChooser.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK
+        | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION
+        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+    context.startActivity(intentChooser);
   }
 
   public Uri getImageUri(Context inContext, String imageInBase64) {
+
     final String pureBase64Encoded = imageInBase64.substring(imageInBase64.indexOf(",") + 1);
 
     final byte[] imgBytesData = android.util.Base64.decode(pureBase64Encoded, android.util.Base64.DEFAULT);
     Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytesData, 0, imgBytesData.length);
-
-    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
 
     File file = new File(inContext.getExternalCacheDir(), "iam_image.png");
     if (file.exists()) {
@@ -430,7 +437,7 @@ public class UpshotPlugin extends CordovaPlugin {
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
-    return Uri.fromFile(file);
+    return FileProvider.getUriForFile(inContext, inContext.getPackageName() + ".provider", file);
   }
 
   private void redirectToCustomUri(String actionValue) {
