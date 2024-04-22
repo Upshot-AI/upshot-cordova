@@ -128,9 +128,9 @@ var UpshotPlugin = {
      * @param {*} params 
      * @param {*} callback 
      */
-    disableUser: function (shouldDisable, callback) {
+    disableUser: function (callback) {
 
-        upshot.disableUser(shouldDisable, callback)
+        upshot.disableUser(callback)
     },
 
     /**
