@@ -9,5 +9,5 @@ repositories{
 dependencies {
    
    // annotationProcessor "com.github.bumptech.glide:compiler:4.9.0"
-   implementation 'com.github.upshot-git:upshottestrepo:v1.7.8x'
+   implementation 'com.github.upshot-git:upshottestrepo:v1.7.19x'
 }
