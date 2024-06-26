@@ -59,11 +59,19 @@ var UpshotPlugin = {
   /**
    * This function is used to get list of push notifications for the user.
    * @param {Number} inboxType
-   * * @param {Number} limit
    * @param {function} responseCallback
    */
-  getUnreadNotificationsCount: function (inboxType, limit, responseCallback) {
-    upshot.getUnreadCount(inboxType, limit, false, responseCallback);
+  getUnreadNotificationsCount: function (inboxType, responseCallback) {
+    upshot.getUnreadCount(inboxType, responseCallback);
+  },
+
+  /**
+   * This function is used to update the push notifications read status.
+   * @param {string} notificationId
+   * @param {function} responseCallback
+   */
+  updateNotificationReadStatus: function (notificationId, responseCallback) {
+    upshot.updateNotificationReadStatus(notificationId, responseCallback);
   },
 
   /**
