@@ -232,11 +232,11 @@ public class UpshotPlugin extends CordovaPlugin {
       JSONObject data = new JSONObject(redirectionData);
       int type = data.getInt("ratingType");
       String url = data.getString("url");
-      if (type == 0) {
+      if (type == 1) { // InApp Rating
         Context context = this.cordova.getActivity().getApplicationContext();
         UpshotReviewManager reviewManager = new UpshotReviewManager(context);
         reviewManager.showRateApp(this.cordova.getActivity());
-      } else {
+      } else { // Broswer Redirection
 
         Context context = this.cordova.getActivity().getApplicationContext();
         final String storePrefix = "https://play.google.com/store/apps/details?id=";
@@ -252,6 +252,8 @@ public class UpshotPlugin extends CordovaPlugin {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
           }
+        } else {
+          redirectToCustomUri(url);
         }
       }
     } catch (JSONException e) {

@@ -371,11 +371,6 @@ var UpshotPlugin = {
     window.addEventListener(
       "UpshotActivityRatingCallback",
       function (data) {
-        console.log(
-          "UpshotActivityRatingCallback--------------- "[
-            JSON.stringify(data.detail)
-          ]
-        );
         cordova.exec(
           null,
           null,
